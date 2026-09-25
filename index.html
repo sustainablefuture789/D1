@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Bhavira Advanced Materials: tunable polymer-graphite composites for EMI shielding and radar absorption, from drones to space. Measured data, modelled estimates and an audio-led 3D pitch.">
+<title>Bhavira Advanced Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Single committed look: deep space. All colours set explicitly. */
+:root{
+  color-scheme:dark;
+  --space:#04060c; --glass:rgba(12,18,31,.78); --glass-2:rgba(22,31,50,.72); --edge:rgba(170,195,235,.16); --edge-2:rgba(170,195,235,.28);
+  --ink:#e9eef7; --muted:#a6b1c6; --faint:#76819a;
+  --earth:#4ea8ff; --mars:#ff7a45; --graphite:#1c1f26; --silver:#c9d1dc; --em:#38e1ff; --violet:#a78bfa;
+  --measured:#3ccf8e; --model:#ffb347; --hypo:#9aa3b2; --future:#9aa3b2;
+  --refl:#e0643a; --abs:#1fb584; --trans:#3f8ff0;
+  --heat-0:#14223a; --heat-1:#9fd0ff;
+  --display:'Chakra Petch','Bahnschrift','Segoe UI',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--space);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:.005em}
+h1{font-size:clamp(30px,4.6vw,56px);line-height:1.04;font-weight:700}
+h2{font-size:clamp(24px,2.8vw,34px);line-height:1.12;font-weight:700}
+h3{font-size:17px;font-weight:600;line-height:1.3}
+p{margin:0}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--em);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+#bg{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+#fade{position:fixed;inset:0;background:var(--space);opacity:0;pointer-events:none;z-index:1;transition:opacity .45s ease}
+.shade{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(4,6,12,.72) 0%,rgba(4,6,12,.35) 42%,rgba(4,6,12,0) 62%)}
+
+/* top bar */
+.top{position:fixed;left:0;right:0;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,rgba(4,6,12,.92),rgba(4,6,12,.55) 70%,rgba(4,6,12,0))}
+.brand{font-family:var(--display);font-weight:700;font-size:16px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.brand i{width:10px;height:10px;border-radius:50%;background:var(--em);box-shadow:0 0 12px var(--em)}
+.modes{display:inline-flex;background:var(--glass);border:1px solid var(--edge);border-radius:11px;padding:3px;gap:2px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.modes button{border:0;background:transparent;color:var(--muted);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;white-space:nowrap}
+.modes button[aria-pressed="true"]{background:var(--em);color:#021018;font-weight:600}
+.jumps{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end}
+.jumps::-webkit-scrollbar{display:none}
+.jumps button{border:1px solid var(--edge);background:var(--glass);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.jumps button:hover{border-color:var(--em)}
+
+/* story */
+main{position:relative;z-index:2;padding-inline:clamp(16px,4vw,56px);padding-block:120px 190px;display:flex;flex-direction:column;gap:22vh}
+.chap{max-width:640px;scroll-margin-top:110px}
+.chap.wide{max-width:1080px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:18px;padding:clamp(18px,2.4vw,28px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:grid;gap:14px}
+.kick{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--em);font-weight:600}
+.lede{color:var(--muted);font-size:16px;max-width:62ch}
+.big{font-size:clamp(18px,1.8vw,22px);line-height:1.45;max-width:46ch}
+.hero-h{display:grid;gap:14px;max-width:760px}
+.hero-h .sub{font-size:clamp(17px,1.7vw,21px);color:var(--silver);max-width:52ch}
+.cta{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:0;border-radius:11px;padding:11px 16px;font-weight:600;cursor:pointer;background:var(--em);color:#021018;font-size:14.5px}
+.btn.alt{background:transparent;border:1px solid var(--edge-2);color:var(--ink);font-weight:500}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--display);font-size:14px;font-weight:600;color:var(--silver)}
+.chain span{padding:5px 10px;border:1px solid var(--edge);border-radius:8px;background:var(--glass-2)}
+.chain b{color:var(--faint);font-weight:400}
+
+/* tags */
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 8px;border:1px solid;width:max-content;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.tag.measured{color:var(--measured);border-color:rgba(60,207,142,.45);background:rgba(60,207,142,.1)}
+.tag.model{color:var(--model);border-color:rgba(255,179,71,.45);background:rgba(255,179,71,.1);border-style:dashed}
+.tag.hypo{color:var(--hypo);border-color:rgba(154,163,178,.45);background:rgba(154,163,178,.08);border-style:dotted}
+.tag.future{color:var(--future);border-color:rgba(154,163,178,.45);background:transparent;border-style:dotted}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px}
+
+/* wave canvases */
+.wv{width:100%;height:190px;display:block;border-radius:12px;background:rgba(3,6,12,.55);border:1px solid var(--edge)}
+.wv.tall{height:230px}
+.toggle{display:inline-flex;background:var(--glass-2);border:1px solid var(--edge);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap}
+.toggle button{border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:13.5px}
+.toggle button[aria-pressed="true"]{background:var(--silver);color:#0a0f18;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.band{height:10px;opacity:.4}
+.eq{font-family:var(--body);font-size:14.5px;background:rgba(3,6,12,.55);border:1px solid var(--edge);padding:8px 12px;border-radius:9px;overflow-x:auto;white-space:nowrap}
+.note{font-size:13px;color:var(--muted);line-height:1.5}
+
+/* compare */
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.cmp .side{border:1px solid var(--edge);border-radius:14px;padding:16px;background:var(--glass-2);display:grid;gap:8px;align-content:start}
+.cmp .mid{display:grid;place-items:center;text-align:center;font-family:var(--display);font-weight:700;color:var(--em);font-size:14px;max-width:150px;line-height:1.3}
+.cmp .q{font-size:16px;font-weight:500}
+.cmp dl{margin:0;display:grid;gap:4px;font-size:14px}
+.cmp dt{color:var(--faint);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.cmp dd{margin:0}
+
+/* dials */
+.dials{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px;margin:0;padding:0;list-style:none;counter-reset:d}
+.dials li{counter-increment:d;display:flex;gap:10px;align-items:baseline;font-size:14.5px;padding-block:5px;border-bottom:1px solid var(--edge)}
+.dials li::before{content:counter(d,decimal-leading-zero);font-family:var(--display);color:var(--em);font-weight:600;font-size:13px}
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:14px}
+.formula span{padding:6px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--glass-2)}
+.formula b{color:var(--em);font-size:18px}
+
+/* tuner */
+.tuner{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:18px;align-items:start}
+.ctl{display:grid;gap:14px}
+.rng label{display:flex;justify-content:space-between;font-size:14px}
+.rng output{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums}
+.rng .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
+input[type=range]{width:100%;accent-color:var(--em)}
+.outp{display:grid;gap:12px}
+.rat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.rat div{border:1px solid var(--edge);border-radius:12px;padding:10px 12px;background:var(--glass-2);display:grid;gap:2px}
+.rat .l{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.rat .l i{width:9px;height:9px;border-radius:50%}
+.rat .v{font-family:var(--display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.rat .s{font-size:12px;color:var(--faint)}
+.meter{display:flex;gap:2px;height:14px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.06)}
+.meter div{height:100%;transition:width .3s ease}
+.headline{font-size:16.5px;line-height:1.5}
+.headline b{font-family:var(--display)}
+
+/* charts */
+.cv{width:100%;height:260px;display:block}
+.chart{position:relative;display:grid;gap:8px}
+.tip{position:absolute;pointer-events:none;background:#0d1524;border:1px solid var(--edge-2);border-radius:9px;padding:7px 10px;font-size:12.5px;white-space:nowrap;z-index:5;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--edge);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12.5px}
+.tbl{overflow-x:auto}
+.quote{border-left:3px solid var(--measured);padding:4px 0 4px 14px;font-size:16.5px;line-height:1.5}
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:start}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.card{border:1px solid var(--edge);border-radius:14px;padding:14px;background:var(--glass-2);display:grid;gap:8px;align-content:start;cursor:default}
+.card ul{margin:0;padding-left:18px;font-size:14px;color:var(--muted);display:grid;gap:3px}
+.card .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:rgba(56,225,255,.12);color:var(--em)}
+.card .ic svg{width:24px;height:24px}
+.card.sel{border-color:var(--em)}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;counter-reset:s}
+.st{border:1px solid var(--edge);border-radius:12px;padding:10px 12px;display:grid;gap:4px;background:var(--glass-2);font-size:14px;position:relative}
+.st .n{font-family:var(--display);font-size:12px;color:var(--faint);font-weight:600}
+.st.done{border-color:rgba(60,207,142,.55)} .st.done .n{color:var(--measured)}
+.st.now{border-color:rgba(255,179,71,.6);box-shadow:0 0 0 1px rgba(255,179,71,.25) inset} .st.now .n{color:var(--model)}
+.st.later{opacity:.72}
+.here{font-size:12px;font-weight:600;color:var(--model)}
+
+/* engineer */
+.eng td:nth-child(3){text-align:left}
+.kn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kn .col{border:1px solid var(--edge);border-radius:14px;padding:14px;background:var(--glass-2);display:grid;gap:8px;align-content:start}
+.kn ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.path{display:flex;flex-wrap:wrap;gap:6px 0;font-family:var(--display);font-size:14px;font-weight:600}
+.path span{padding:6px 11px;border:1px solid var(--edge);border-radius:9px;background:var(--glass-2);margin-right:16px;position:relative}
+.path span:not(:last-child)::after{content:"";position:absolute;right:-13px;top:50%;width:10px;height:2px;background:var(--em)}
+.mkt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mkt div{border:1px solid var(--edge);border-radius:12px;padding:12px 14px;background:var(--glass-2);display:grid;gap:2px}
+.mkt .v{font-family:var(--display);font-size:24px;font-weight:700}
+.final{text-align:left;display:grid;gap:12px;max-width:820px}
+.final .mega{font-family:var(--display);font-size:clamp(28px,4vw,48px);line-height:1.08;font-weight:700}
+.sources{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+.sources a{color:var(--em)}
+.hidden-note{font-size:13px;color:var(--muted);background:var(--glass);border:1px dashed var(--edge-2);border-radius:12px;padding:10px 14px;max-width:640px}
+
+/* player */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:25;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 16px;align-items:center;background:linear-gradient(0deg,rgba(4,6,12,.97),rgba(4,6,12,.86) 75%,rgba(4,6,12,0))}
+.people{display:flex;gap:8px}
+.person{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;border:1px solid var(--edge);background:var(--glass);transition:border-color .2s, box-shadow .2s}
+.person svg{width:42px;height:42px;border-radius:50%;flex:none}
+.person .who{display:grid;line-height:1.2}
+.person .who b{font-size:13px}
+.person .who span{font-size:11.5px;color:var(--muted)}
+.person.talk{border-color:var(--em);box-shadow:0 0 0 3px rgba(56,225,255,.18)}
+.person.talk .mouth{animation:talk .22s infinite alternate}
+@keyframes talk{from{transform:scaleY(.4)}to{transform:scaleY(1.4)}}
+.sub{font-size:15.5px;line-height:1.45;min-height:2.9em;max-width:90ch;display:flex;align-items:center}
+.sub b{color:var(--em);margin-right:6px;font-weight:600;white-space:nowrap}
+.ctrls{display:flex;gap:6px;align-items:center}
+.ctrls button{border:1px solid var(--edge-2);background:var(--glass);border-radius:10px;height:38px;min-width:38px;padding:0 10px;cursor:pointer;display:grid;place-items:center;font-size:13px}
+.ctrls button.play{background:var(--em);color:#021018;border-color:var(--em);font-weight:600;padding:0 14px}
+.ctrls svg{width:16px;height:16px}
+.fict{font-size:11px;color:var(--faint);grid-column:1 / -1;margin-top:-4px}
+
+@media (max-width: 1100px){ .shade{background:rgba(4,6,12,.55)} }
+@media (max-width: 900px){
+  .tuner,.cols{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  .cmp .mid{max-width:none;padding:4px}
+  .kn{grid-template-columns:1fr}
+  .player{grid-template-columns:1fr;gap:8px}
+  .people{order:-1}
+  .ctrls{justify-content:center}
+  .fict{display:none}
+  main{padding-block:110px 240px}
+  .person .who span{display:none}
+}
+@media (max-width: 620px){
+  .jumps{display:none}
+  .top{justify-content:space-between}
+  .modes button{padding:6px 8px;font-size:12.5px}
+  .dials{grid-template-columns:1fr}
+  .rat{grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .rat .v{font-size:20px}
+  .mkt{grid-template-columns:1fr}
+  main{gap:14vh}
+  .sub{font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="shade" aria-hidden="true"></div>
+<div id="fade" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="brand"><i></i>Bhavira Advanced Materials</div>
+  <div class="modes" role="group" aria-label="Audience">
+    <button data-mode="full" aria-pressed="true">Full story</button>
+    <button data-mode="investor" aria-pressed="false">Investor</button>
+    <button data-mode="scientist" aria-pressed="false">Scientist</button>
+    <button data-mode="defence" aria-pressed="false">Defence</button>
+  </div>
+  <nav class="jumps" aria-label="Jump to">
+    <button data-jump="emi">Explore EMI</button>
+    <button data-jump="ram">Explore RAM</button>
+    <button data-jump="tuning">Design material</button>
+    <button data-jump="measured">See our data</button>
+    <button data-jump="mars">Explore space</button>
+    <button data-jump="engineer">Engineer mode</button>
+  </nav>
+</header>
+
+<main id="story">
+  <p class="hidden-note" id="modeNote" hidden></p>
+
+  <section class="chap" id="hero" data-ch="hero">
+    <div class="hero-h">
+      <div class="kick">Tunable EMI and radar-absorbing materials for defence, drones and space</div>
+      <h1>We don't just make a material. We engineer how it interacts with electromagnetic energy.</h1>
+      <p class="sub">Electromagnetic energy surrounds every modern platform, from communication systems and radar to spacecraft electronics. Can we engineer the material itself to control what happens to that energy?</p>
+      <div class="chain" aria-label="Journey"><span>Earth</span><b>→</b><span>Drone</span><b>→</b><span>Aircraft</span><b>→</b><span>Spacecraft</span><b>→</b><span>Mars</span></div>
+      <div class="cta">
+        <button class="btn" id="heroPlay">Play pitch · about 6 min</button>
+        <button class="btn alt" data-jump="tuning">Design a material</button>
+        <button class="btn alt" data-jump="measured">See our data</button>
+      </div>
+      <div class="tagrow"><span class="tag measured">Measured</span><span class="tag model">Modelled estimate</span><span class="tag hypo">Engineering hypothesis</span><span class="tag future">Future testing</span></div>
+      <p class="note">Every claim on this page carries one of these four labels.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="energy" data-ch="energy">
+    <div class="glass">
+      <div class="kick">What happens to a wave</div>
+      <h2>Energy hitting a surface can go three ways</h2>
+      <p class="lede">A radio or radar wave that meets a material is partly reflected, partly absorbed and turned into heat, and partly transmitted through. Engineering a material means controlling that split.</p>
+      <canvas class="wv" id="wvEnergy" aria-label="Animated wave split into reflected, absorbed and transmitted parts"></canvas>
+      <div class="chain" id="energyChain"><span data-k="in">Incoming energy</span><b>→</b><span data-k="r">Reflection</span><b>→</b><span data-k="a">Absorption</span><b>→</b><span data-k="t">Transmission</span></div>
+      <div class="legend"><span><i style="background:var(--em)"></i>Incoming</span><span><i style="background:var(--refl)"></i>Reflected</span><span><i style="background:var(--abs)"></i>Absorbed as heat</span><span><i style="background:var(--trans)"></i>Transmitted</span></div>
+      <p class="note">Illustration uses the average of our three measured 60:40 samples at 10 GHz. <span class="tag measured">Measured</span></p>
+    </div>
+  </section>
+
+  <section class="chap" id="emi" data-ch="emi">
+    <div class="glass">
+      <div class="kick">EMI shielding</div>
+      <h2>Protect the electronics</h2>
+      <p class="big">EMI shielding reduces unwanted electromagnetic energy reaching sensitive electronics.</p>
+      <div class="toggle" role="group" aria-label="Shield"><button id="emiOff" aria-pressed="false">Without shielding</button><button id="emiOn" aria-pressed="true">With 60:40 shield</button></div>
+      <canvas class="wv tall" id="wvEmi" aria-label="Animated EMI shielding"></canvas>
+      <p class="headline" id="emiLine"></p>
+      <div class="eq">SE (dB) = 10 log₁₀ (P<sub>incident</sub> / P<sub>transmitted</sub>)</div>
+      <p class="note">10 dB stops 90% of the power, 20 dB stops 99%, 30 dB stops 99.9%. Real shielding comes from reflection, absorption and multiple internal reflections. Higher reflection is not automatically better: the reflected energy can interfere with nearby systems.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="ram" data-ch="ram">
+    <div class="glass">
+      <div class="kick">Radar-absorbing material</div>
+      <h2>Control the echo</h2>
+      <p class="big">A radar-absorbing material is designed to reduce the energy returned toward the radar by increasing absorption and controlling electromagnetic impedance.</p>
+      <div class="toggle" role="group" aria-label="Surface"><button id="ramMetal" aria-pressed="true">Conventional metal surface</button><button id="ramEng" aria-pressed="false">Engineered absorbing surface</button></div>
+      <canvas class="wv tall" id="wvRam" aria-label="Animated radar echo"></canvas>
+      <p class="headline" id="ramLine"></p>
+      <p class="note">Bhavira material has the potential to reduce electromagnetic signature under specific conditions. It does not make a platform invisible or undetectable, and no stealth performance is claimed.</p>
+    </div>
+  </section>
+
+  <section class="chap wide" id="compare" data-ch="compare">
+    <div class="glass">
+      <div class="kick">EMI vs RAM</div>
+      <h2>Same material platform, different design target</h2>
+      <div class="cmp">
+        <div class="side">
+          <h3>EMI shielding</h3>
+          <dl><dt>Objective</dt><dd>Protect electronics</dd><dt>Key question</dt><dd class="q">How much electromagnetic energy reaches the electronics?</dd><dt>Design levers</dt><dd>Reflection + absorption + transmission control</dd><dt>Success looks like</dt><dd>Low transmission, measured as high dB shielding</dd></dl>
+        </div>
+        <div class="mid">Same material platform<br>but a different design target</div>
+        <div class="side">
+          <h3>Radar absorption</h3>
+          <dl><dt>Objective</dt><dd>Reduce reflected electromagnetic energy</dd><dt>Key question</dt><dd class="q">How much electromagnetic energy returns toward the source?</dd><dt>Design levers</dt><dd>Impedance matching + absorption + reduced reflection</dd><dt>Success looks like</dt><dd>Low reflection, for example below −10 dB (90% absorbed)</dd></dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap" id="material" data-ch="material">
+    <div class="glass">
+      <div class="kick">The Bhavira platform</div>
+      <h2>Tunable polymer–graphite composite</h2>
+      <p class="lede">Graphite flakes dispersed in a polymer. Once enough flakes touch, they form a conductive network, and the network's density and geometry shape how the composite responds to electromagnetic waves.</p>
+      <div class="formula"><span>Polymer matrix</span><b>+</b><span>Graphite filler</span><b>+</b><span>Microstructure</span><b>+</b><span>Layer thickness</span><b>=</b><span style="border-color:var(--em);color:var(--em)">Electromagnetic response</span></div>
+      <h3>Properties we are investigating as tuning dials</h3>
+      <ol class="dials">
+        <li>Graphite / filler loading</li><li>Polymer composition</li><li>Thickness</li><li>Layer architecture</li><li>Filler morphology</li><li>Dispersion</li><li>Interface design</li><li>Surface structure</li><li>Substrate</li><li>Frequency</li>
+      </ol>
+      <p class="note">Only loading, thickness, layering and frequency are in the current model. The others are <span class="tag hypo">Engineering hypothesis</span> for future experiments.</p>
+    </div>
+  </section>
+
+  <section class="chap wide" id="tuning" data-ch="tuning">
+    <div class="glass">
+      <div class="kick">Tuning the material</div>
+      <h2>Design a material and see where the energy goes</h2>
+      <p class="lede">The 3D slab and the numbers update as you move the sliders. The label tells you whether a number was measured, modelled or is untested.</p>
+      <div class="tuner">
+        <div class="ctl">
+          <div class="toggle" role="group" aria-label="Use"><button id="tgEmi" aria-pressed="true">EMI shield sheet</button><button id="tgRam" aria-pressed="false">Radar absorber on metal</button></div>
+          <div class="rng"><label for="sw">Graphite content <output id="swo"></output></label><input id="sw" type="range" min="0" max="100" step="1" value="60"><div class="ends"><span>Pure polymer</span><span>Pure graphite</span></div></div>
+          <div class="rng"><label for="st">Total thickness <output id="sto"></output></label><input id="st" type="range" min="0.1" max="5" step="0.05" value="0.5"></div>
+          <div class="rng"><label for="sl">Number of layers <output id="slo"></output></label><input id="sl" type="range" min="1" max="3" step="1" value="1"><div class="ends"><span>Single</span><span>Graded stack</span></div></div>
+          <div class="rng"><label for="sf">Frequency <output id="sfo"></output></label><input id="sf" type="range" min="1" max="18" step="0.1" value="10"><div class="ends"><span>1 GHz</span><span>18 GHz</span></div></div>
+          <div class="rng"><label for="ss">Surface structure <output id="sso"></output></label><input id="ss" type="range" min="0" max="100" step="1" value="0"><div class="ends"><span>Smooth</span><span>Structured</span></div></div>
+          <div class="toggle" role="group" aria-label="Layer interface"><button id="ifOff" aria-pressed="true">Interface layer off</button><button id="ifOn" aria-pressed="false">Interface layer on</button></div>
+          <button class="btn alt" id="resetMeasured">Reset to our tested sample</button>
+        </div>
+        <div class="outp">
+          <div class="tagrow" id="tuneTags"></div>
+          <div class="rat">
+            <div><span class="l"><i style="background:var(--refl)"></i>Reflected</span><span class="v" id="oR">–</span><span class="s" id="oRs"></span></div>
+            <div><span class="l"><i style="background:var(--abs)"></i>Absorbed</span><span class="v" id="oA">–</span><span class="s" id="oAs"></span></div>
+            <div><span class="l"><i style="background:var(--trans)"></i>Transmitted</span><span class="v" id="oT">–</span><span class="s" id="oTs"></span></div>
+          </div>
+          <div class="meter" aria-hidden="true"><div id="mR" style="background:var(--refl)"></div><div id="mA" style="background:var(--abs)"></div><div id="mT" style="background:var(--trans)"></div></div>
+          <p class="headline" id="tuneLine"></p>
+          <p class="note" id="tuneNote"></p>
+          <canvas class="wv" id="wvTune" aria-label="Wave interacting with the designed material"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="measured" data-ch="measured">
+    <div class="glass">
+      <div class="tagrow"><span class="tag measured">Measured · laboratory</span></div>
+      <h2>What we have measured so far</h2>
+      <p class="lede">60:40 graphite:polymer, 0.5 mm thick, rectangular waveguide, X band 8.2–12.4 GHz, three samples.</p>
+      <div class="cols">
+        <div class="chart">
+          <canvas class="cv" id="cvMeas" aria-label="Measured reflected, absorbed and transmitted power across frequency"></canvas>
+          <div class="legend"><span><i style="background:var(--refl)"></i>Reflected</span><span><i style="background:var(--abs)"></i>Absorbed</span><span><i style="background:var(--trans)"></i>Transmitted</span><span><i class="band" style="background:var(--silver)"></i>range of 3 samples</span></div>
+          <div class="tip" id="tipMeas" hidden></div>
+        </div>
+        <div style="display:grid;gap:12px">
+          <div class="tbl"><table id="measTbl"></table></div>
+          <p class="quote">These initial measurements indicate significant reflection and measurable absorption. At this composition and thickness, the material behaves more like a reflective EMI-shielding material than a strongly absorbing RAM.</p>
+          <p class="note">Further controlled measurements are required to optimise absorption. Small negative absorption values near 11.3–12 GHz point to calibration or fixture ripple, which the next test round should remove.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="space-map" data-ch="space-map">
+    <div class="glass">
+      <div class="kick">The material design space</div>
+      <h2>One point measured, the rest still to explore</h2>
+      <p class="lede">Graphite content across, thickness up, colour shows the chosen response for a single free-standing sheet at 10 GHz.</p>
+      <div class="toggle" role="group" aria-label="Metric" id="mapMetric"><button data-m="R" aria-pressed="false">Reflection</button><button data-m="A" aria-pressed="true">Absorption</button><button data-m="T" aria-pressed="false">Transmission</button><button data-m="SE" aria-pressed="false">Shielding (dB)</button></div>
+      <div class="chart">
+        <canvas class="cv" id="cvMap" style="height:300px" aria-label="Design space heatmap"></canvas>
+        <div class="legend" id="lgMap"></div>
+        <div class="tip" id="tipMap" hidden></div>
+      </div>
+      <div class="tagrow"><span class="tag measured">Measured: 60%, 0.5 mm</span><span class="tag model">Modelled: 0–60%</span><span class="tag future">Untested: above 60%</span></div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="insight" data-ch="insight">
+    <div class="glass">
+      <div class="tagrow"><span class="tag model">Model prediction · not experimentally validated</span></div>
+      <h2>Where the model says to look next</h2>
+      <p class="lede">Lower conductive-filler content and greater thickness may provide a pathway toward greater absorption, but the current dataset is too limited to establish an optimum. These are candidate regions for future experiments, not a best material.</p>
+      <div class="chart">
+        <canvas class="cv" id="cvIns" aria-label="Predicted reflection on metal for candidate designs"></canvas>
+        <div class="legend" id="lgIns"></div>
+        <div class="tip" id="tipIns" hidden></div>
+      </div>
+      <p class="note">Reflection loss of each design on a metal plate at normal incidence. Line is the model median, shading the 10–90% range across 160 model draws. Values below −10 dB mean at least 90% of the incoming power is absorbed.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="multilayer" data-ch="multilayer">
+    <div class="glass">
+      <div class="kick">Why multilayer materials?</div>
+      <h2>Layers give more control over where the wave goes</h2>
+      <canvas class="wv tall" id="wvLayers" aria-label="Wave entering a multilayer cross-section"></canvas>
+      <p class="lede">A multilayer architecture can provide additional control over impedance matching, internal reflections and electromagnetic loss: an outer layer eases the wave in, inner layers absorb, a conductive interface or substrate turns back what is left for a second pass.</p>
+      <p class="note">Cross-section is conceptual. <span class="tag hypo">Engineering hypothesis</span> Performance must be measured.</p>
+    </div>
+  </section>
+
+  <section class="chap wide" id="apps" data-ch="apps">
+    <div class="glass">
+      <div class="kick">Potential applications</div>
+      <h2>Where the platform could be used</h2>
+      <div class="cards" id="appCards"></div>
+      <p class="note">All applications are potential and require application-specific validation. <span class="tag future">Future testing</span></p>
+    </div>
+  </section>
+
+  <section class="chap" id="mars" data-ch="mars">
+    <div class="glass">
+      <div class="tagrow"><span class="tag future">Concept for future validation</span></div>
+      <h2>From Earth to Mars</h2>
+      <p class="big">Space systems operate in an electromagnetic environment where communication, sensing and electronic protection must coexist.</p>
+      <p class="lede">Future materials may need to combine structural performance, low mass, environmental durability and electromagnetic functionality. The glowing layer on the rover and spacecraft shows where a thin functional coating could sit. The material has not been space qualified.</p>
+      <div class="chain"><span>Mars surface</span><b>→</b><span>Rover</span><b>→</b><span>Aerial platform</span><b>→</b><span>Antenna</span><b>→</b><span>Spacecraft</span><b>→</b><span>Earth link</span></div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="function" data-ch="function">
+    <div class="glass">
+      <div class="kick">Same material, different function</div>
+      <h2>Composition becomes a design variable</h2>
+      <div class="cards" id="funcCards"></div>
+      <p class="big">Material composition is not simply a manufacturing parameter. It can become a design variable.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="sustain" data-ch="sustain">
+    <div class="glass">
+      <div class="kick">Weight and sustainability</div>
+      <h2>A polymer-processable functional composite</h2>
+      <div class="formula"><span>Polymer / recycled feedstock</span><b>+</b><span>Graphite</span><b>→</b><span style="border-color:var(--em);color:var(--em)">Functional composite</span></div>
+      <p class="lede">Potential advantages being investigated: lightweight, tunable, corrosion-resistant, polymer-processable, potentially scalable, and potential use of recycled feedstocks.</p>
+      <div class="tbl"><table id="massTbl"></table></div>
+      <p class="note">Areal mass is calculated from density; the composite density assumes graphite 2.2 g/cm³ and polymer 1.2 g/cm³. <span class="tag model">Calculated</span> No quantitative environmental benefit is claimed until life-cycle data exists.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="question" data-ch="question">
+    <div class="hero-h">
+      <h2 style="font-size:clamp(28px,3.6vw,44px)">Can one material platform be tuned for different electromagnetic problems?</h2>
+      <div class="chain"><span>EMI shielding</span><b>→</b><span>Radar absorption</span><b>→</b><span>Communication</span><b>→</b><span>Sensing</span><b>→</b><span>Space electronics</span></div>
+      <p class="sub">Same platform. Different architecture. Different electromagnetic response.</p>
+    </div>
+  </section>
+
+  <section class="chap wide" id="roadmap" data-ch="roadmap">
+    <div class="glass">
+      <div class="kick">Testing roadmap</div>
+      <h2>We are at the laboratory, material-development stage</h2>
+      <div class="road" id="road"></div>
+      <div class="legend"><span><i style="background:var(--measured)"></i>Done</span><span><i style="background:var(--model)"></i>In progress</span><span><i style="background:var(--hypo)"></i>Future validation</span></div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="engineer" data-ch="engineer">
+    <div class="glass">
+      <div class="kick">Engineer mode</div>
+      <h2>The numbers behind the current design</h2>
+      <p class="lede" id="engSummary"></p>
+      <div class="tbl"><table class="eng" id="engTbl"></table></div>
+      <div class="eq">R = |S11|² &nbsp;&nbsp; T = |S21|² &nbsp;&nbsp; A = 1 − |S11|² − |S21|² &nbsp;&nbsp; SE = 10 log₁₀(P<sub>i</sub>/P<sub>t</sub>) &nbsp;&nbsp; Γ = E<sub>r</sub>/E<sub>i</sub></div>
+      <div class="eq">ε = ε′ − jε″, &nbsp; tan δ = ε″/ε′, &nbsp; R<sub>s</sub> = 1/(σ d), &nbsp; RL = 20 log₁₀|Γ| for a layer stack on metal</div>
+      <p class="note">These equations are simplified representations; measurement configuration (waveguide vs free space, angle, polarisation, sample fit) matters. The model is calibrated only on the 60:40, 0.5 mm waveguide data. At 60:40 two sets of material properties fit the data equally well, so model values carry wide ranges.</p>
+    </div>
+  </section>
+
+  <section class="chap wide" id="caution" data-ch="caution">
+    <div class="glass">
+      <div class="kick">Scientific caution</div>
+      <h2>What we know, and what we still need to test</h2>
+      <div class="kn">
+        <div class="col"><span class="tag measured">Known / measured</span><ul><li>Initial 60:40 composite measurements</li><li>X-band measurements, 8.2–12.4 GHz</li><li>Shielding effectiveness values, 12–18 dB</li><li>Reflection, absorption and transmission observations</li></ul></div>
+        <div class="col"><span class="tag model">Modelled</span><ul><li>Other compositions</li><li>Other thicknesses</li><li>Multilayer concepts</li><li>Frequencies outside 8.2–12.4 GHz</li></ul></div>
+        <div class="col"><span class="tag future">Not yet validated</span><ul><li>Full-scale drone signature reduction</li><li>Aircraft application</li><li>Spacecraft performance</li><li>Mars environmental durability</li><li>Long-term radiation exposure</li><li>Vacuum behaviour</li><li>Thermal cycling</li><li>Mechanical durability</li><li>Real-world radar detection range</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap wide" id="investor" data-ch="investor">
+    <div class="glass">
+      <div class="kick">For investors and partners</div>
+      <h2>Bhavira is developing a materials platform where electromagnetic performance can be engineered through composition, thickness and architecture.</h2>
+      <p class="big">We are not claiming a finished stealth material. We are building the experimental and modelling pathway to discover application-specific electromagnetic materials.</p>
+      <div class="path"><span>Material</span><span>Measurement</span><span>Modelling</span><span>Tuning</span><span>Prototype</span><span>Application validation</span></div>
+      <div class="mkt">
+        <div><span class="note">Global EMI shielding market</span><span class="v">$7.7B → $10.9B</span><span class="note">2025 to 2032, 5.2% a year · MarketsandMarkets</span></div>
+        <div><span class="note">Radar-absorbing materials market</span><span class="v">≈ $4.3B by 2033</span><span class="note">Grand View Research</span></div>
+      </div>
+      <h3>What we are looking for</h3>
+      <div class="cards">
+        <div class="card"><h3>Research partners</h3><ul><li>Free-space and multi-band test access</li><li>Environmental, thermal-vacuum facilities</li><li>University and agency collaboration</li></ul></div>
+        <div class="card"><h3>Industry pilots</h3><ul><li>Drone and UAS makers</li><li>Satellite and avionics teams</li><li>Defence and aerospace primes</li></ul></div>
+        <div class="card"><h3>Funding</h3><ul><li>Deep-tech and strategic investors</li><li>Government innovation programmes</li><li>Grants for materials validation</li></ul></div>
+      </div>
+      <div class="sources">
+        <span>Sources:</span>
+        <a href="https://www.marketsandmarkets.com/Market-Reports/emi-shielding-market-105681800.html" target="_blank" rel="noopener">MarketsandMarkets, EMI Shielding Market</a>
+        <a href="https://www.grandviewresearch.com/press-release/global-radar-absorbing-materials-market" target="_blank" rel="noopener">Grand View Research, Radar Absorbing Materials Market</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap" id="final" data-ch="final">
+    <div class="final">
+      <div class="kick">Bhavira Technologies</div>
+      <p class="mega">From Earth to Mars: designing materials for the electromagnetic future.</p>
+      <p class="sub" style="font-size:19px;color:var(--silver)">Tunable materials for electromagnetic protection and future space applications. From research to real-world impact.</p>
+      <div class="tagrow"><span class="tag model">Experimental validation is ongoing</span></div>
+      <div class="cta"><button class="btn" id="replayBtn">Replay the pitch</button><button class="btn alt" data-jump="tuning">Design a material</button></div>
+    </div>
+  </section>
+</main>
+
+<div class="player" role="region" aria-label="Presentation player">
+  <div class="people">
+    <div class="person" id="pA">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1d2b44"/><path d="M8 48c1-10 8-14 16-14s15 4 16 14z" fill="#2f4a78"/><path d="M20 34l4 5 4-5z" fill="#dfe6f2"/><circle cx="24" cy="21" r="9" fill="#c99b7a"/><path d="M15 19c0-6 4-9 9-9s9 3 9 8c-2-2-5-3-9-3-4 0-7 2-9 4z" fill="#2a2320"/><circle cx="20.5" cy="21" r="1.1" fill="#1a1a1a"/><circle cx="27.5" cy="21" r="1.1" fill="#1a1a1a"/><rect class="mouth" x="21.5" y="25.5" width="5" height="1.6" rx=".8" fill="#6b3b33" style="transform-origin:24px 26.3px"/></svg>
+      <div class="who"><b>Alex</b><span>Defence systems engineer</span></div>
+    </div>
+    <div class="person" id="pB">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#23304a"/><path d="M8 48c1-10 8-14 16-14s15 4 16 14z" fill="#e9eef5"/><path d="M21 34l3 6 3-6z" fill="#38e1ff"/><circle cx="24" cy="21" r="9" fill="#8d6146"/><path d="M14.5 22c-1-8 4-12 9.5-12s10.5 4 9.5 12c-1-4-4-6.5-9.5-6.5S15.5 18 14.5 22z" fill="#1b1411"/><circle cx="24" cy="9.5" r="3.4" fill="#1b1411"/><circle cx="20.5" cy="21.5" r="1.1" fill="#111"/><circle cx="27.5" cy="21.5" r="1.1" fill="#111"/><rect class="mouth" x="21.5" y="26" width="5" height="1.6" rx=".8" fill="#5a2e27" style="transform-origin:24px 26.8px"/></svg>
+      <div class="who"><b>Priya</b><span>Space materials engineer</span></div>
+    </div>
+  </div>
+  <p class="sub" id="subtitle" aria-live="polite">Press play for a narrated tour, or scroll at your own pace.</p>
+  <div class="ctrls">
+    <button id="bPrev" aria-label="Previous section"><svg viewBox="0 0 16 16"><path d="M3 3v10M13 3 6 8l7 5z" fill="currentColor" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    <button id="bPlay" class="play" aria-label="Play pitch">Play pitch</button>
+    <button id="bNext" aria-label="Next section"><svg viewBox="0 0 16 16"><path d="M13 3v10M3 3l7 5-7 5z" fill="currentColor" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    <button id="bReplay" aria-label="Replay from start"><svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2v3h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <button id="bSubs" aria-pressed="true" aria-label="Subtitles on or off">CC</button>
+  </div>
+  <p class="fict">Alex and Priya are fictional presenters. Voices come from your browser's text-to-speech.</p>
+</div>
+<script>window.__BHAVIRA_DATA__={"f":[8.2,8.22,8.24,8.26,8.28,8.3,8.32,8.34,8.36,8.38,8.4,8.42,8.44,8.46,8.48,8.5,8.52,8.54,8.56,8.58,8.6,8.62,8.64,8.66,8.68,8.7,8.72,8.74,8.76,8.78,8.8,8.82,8.84,8.86,8.88,8.9,8.92,8.94,8.96,8.98,9.0,9.02,9.04,9.06,9.08,9.1,9.12,9.14,9.16,9.18,9.2,9.22,9.24,9.26,9.28,9.3,9.32,9.34,9.36,9.38,9.4,9.42,9.44,9.46,9.48,9.5,9.52,9.54,9.56,9.58,9.6,9.62,9.64,9.66,9.68,9.7,9.72,9.74,9.76,9.78,9.8,9.82,9.84,9.86,9.88,9.9,9.92,9.94,9.96,9.98,10.0,10.02,10.04,10.06,10.08,10.1,10.12,10.14,10.16,10.18,10.2,10.22,10.24,10.26,10.28,10.3,10.32,10.34,10.36,10.38,10.4,10.42,10.44,10.46,10.48,10.5,10.52,10.54,10.56,10.58,10.6,10.62,10.64,10.66,10.68,10.7,10.72,10.74,10.76,10.78,10.8,10.82,10.84,10.86,10.88,10.9,10.92,10.94,10.96,10.98,11.0,11.02,11.04,11.06,11.08,11.1,11.12,11.14,11.16,11.18,11.2,11.22,11.24,11.26,11.28,11.3,11.32,11.34,11.36,11.38,11.4,11.42,11.44,11.46,11.48,11.5,11.52,11.54,11.56,11.58,11.6,11.62,11.64,11.66,11.68,11.7,11.72,11.74,11.76,11.78,11.8,11.82,11.84,11.86,11.88,11.9,11.92,11.94,11.96,11.98,12.0],"R":{"mean":[0.8329,0.8312,0.8331,0.8355,0.8368,0.8373,0.839,0.8408,0.8417,0.8434,0.844,0.8455,0.8496,0.8431,0.8375,0.8359,0.837,0.8398,0.8387,0.8361,0.8331,0.8313,0.8304,0.8297,0.8288,0.8281,0.8295,0.8296,0.8266,0.8269,0.8294,0.8335,0.8358,0.8351,0.8355,0.8369,0.837,0.8362,0.8348,0.8354,0.8404,0.8448,0.8389,0.833,0.8311,0.8319,0.8317,0.8305,0.8278,0.8254,0.8247,0.8232,0.8217,0.8202,0.8224,0.8264,0.8261,0.8211,0.8208,0.8228,0.8251,0.83,0.8329,0.8331,0.838,0.8389,0.8328,0.8286,0.83,0.8382,0.8461,0.8401,0.8325,0.8299,0.8293,0.8287,0.8276,0.8241,0.8207,0.8204,0.8179,0.8127,0.81,0.8112,0.8144,0.8198,0.8208,0.8102,0.8117,0.8144,0.8152,0.8217,0.8261,0.832,0.8423,0.8331,0.8228,0.8233,0.8281,0.8376,0.8478,0.849,0.8361,0.8279,0.8288,0.8298,0.8296,0.8227,0.8171,0.8163,0.8117,0.8032,0.8001,0.8026,0.8088,0.8175,0.817,0.8014,0.8015,0.8052,0.8052,0.8144,0.8269,0.8253,0.8329,0.8351,0.8282,0.8234,0.8256,0.8371,0.8569,0.8592,0.844,0.8361,0.8339,0.8338,0.8323,0.8247,0.8153,0.8125,0.8062,0.7943,0.7913,0.7907,0.7963,0.8059,0.7966,0.7742,0.7749,0.7863,0.8,0.8192,0.8173,0.7982,0.8109,0.8409,0.8377,0.8271,0.8349,0.85,0.8794,0.9137,0.9029,0.8559,0.8428,0.8497,0.8588,0.854,0.8317,0.8167,0.8086,0.7935,0.7787,0.7798,0.7818,0.7859,0.771,0.7246,0.7046,0.7169,0.7427,0.7736,0.7969,0.7581,0.7368,0.7723,0.8177,0.8492,0.8416,0.841,0.8758],"lo":[0.8127,0.8112,0.8145,0.8191,0.8217,0.8237,0.8266,0.8298,0.8316,0.8336,0.8351,0.8376,0.837,0.8346,0.8278,0.8249,0.8219,0.8222,0.8235,0.8229,0.8185,0.8161,0.8144,0.8132,0.8121,0.8115,0.8146,0.8154,0.8128,0.8138,0.8174,0.8235,0.8275,0.8274,0.8299,0.8327,0.8331,0.8293,0.8247,0.8196,0.8165,0.8172,0.8169,0.8148,0.8139,0.8147,0.8164,0.8164,0.8127,0.8098,0.8089,0.8068,0.805,0.8034,0.8072,0.8136,0.8141,0.8096,0.8102,0.814,0.8177,0.8245,0.8279,0.8236,0.8204,0.8192,0.8157,0.8096,0.8049,0.8026,0.8048,0.8067,0.8071,0.807,0.8085,0.8109,0.8115,0.8072,0.8032,0.8034,0.7996,0.793,0.7901,0.7922,0.7976,0.8073,0.8088,0.7971,0.8029,0.8077,0.8074,0.8166,0.8141,0.8103,0.8126,0.8116,0.8047,0.7982,0.793,0.7914,0.7928,0.7976,0.7995,0.7983,0.7992,0.8019,0.8068,0.8027,0.7973,0.7963,0.7889,0.778,0.7756,0.7794,0.7891,0.8039,0.802,0.7828,0.7852,0.7892,0.7934,0.8073,0.8194,0.8163,0.8149,0.815,0.8094,0.8004,0.7907,0.7847,0.7856,0.7926,0.7938,0.7907,0.7893,0.7917,0.7959,0.7984,0.7923,0.7901,0.7797,0.7639,0.7622,0.7613,0.7689,0.7828,0.7666,0.7401,0.7485,0.7666,0.7863,0.8106,0.8037,0.7794,0.8032,0.8251,0.8206,0.8189,0.8046,0.794,0.7888,0.7972,0.8167,0.8067,0.7883,0.7813,0.7817,0.7857,0.7845,0.7807,0.783,0.7571,0.7408,0.7428,0.7426,0.7454,0.71,0.6445,0.6363,0.6619,0.7007,0.7336,0.746,0.6836,0.6552,0.7076,0.7612,0.7856,0.7776,0.8043,0.8494],"hi":[0.8494,0.8519,0.8535,0.855,0.856,0.8559,0.8553,0.854,0.8512,0.8484,0.853,0.8598,0.8671,0.8581,0.8551,0.8576,0.8631,0.8683,0.8658,0.8596,0.854,0.8485,0.8453,0.8403,0.8393,0.8416,0.8439,0.8467,0.8474,0.8473,0.8466,0.8463,0.8451,0.8431,0.8394,0.8422,0.8449,0.8473,0.8507,0.8576,0.8696,0.8753,0.8657,0.8595,0.8588,0.8608,0.8599,0.8552,0.8483,0.8414,0.8369,0.8314,0.8343,0.8354,0.8363,0.8389,0.8409,0.8392,0.8375,0.8354,0.8329,0.835,0.8421,0.8457,0.8551,0.8555,0.8495,0.8504,0.8595,0.878,0.8896,0.8765,0.8645,0.8627,0.8623,0.8609,0.8576,0.8488,0.8403,0.8362,0.8285,0.8274,0.8277,0.8283,0.829,0.8306,0.834,0.8315,0.8272,0.8273,0.8221,0.8315,0.8419,0.8532,0.8634,0.8458,0.8398,0.8508,0.8661,0.8863,0.904,0.8993,0.8751,0.8654,0.8694,0.8719,0.8695,0.855,0.8426,0.8368,0.8256,0.8224,0.8219,0.8223,0.8244,0.8284,0.8363,0.8358,0.8316,0.8307,0.8261,0.8182,0.8366,0.835,0.8442,0.8461,0.8399,0.8443,0.8593,0.8867,0.922,0.9155,0.8886,0.8827,0.8844,0.8861,0.8847,0.8724,0.8544,0.8447,0.831,0.8105,0.8095,0.8113,0.8147,0.8263,0.8374,0.8336,0.826,0.8245,0.8254,0.8337,0.8432,0.8312,0.8198,0.8599,0.859,0.8357,0.8577,0.8941,0.95,0.9968,0.9472,0.8835,0.8884,0.9158,0.9416,0.935,0.8971,0.8739,0.8588,0.8366,0.8123,0.8095,0.8056,0.817,0.8419,0.836,0.8185,0.8152,0.8243,0.8468,0.8832,0.8917,0.8607,0.8554,0.8702,0.8936,0.8942,0.8683,0.9]},"A":{"mean":[0.1381,0.1368,0.1307,0.1244,0.1212,0.119,0.1135,0.1057,0.1008,0.1046,0.1147,0.1191,0.1065,0.1126,0.1304,0.1412,0.143,0.1395,0.1405,0.144,0.1475,0.1489,0.1479,0.1457,0.1436,0.1411,0.1356,0.1319,0.1328,0.1289,0.1191,0.1129,0.1132,0.1165,0.1154,0.1115,0.109,0.1135,0.1252,0.1338,0.1303,0.1203,0.1284,0.1422,0.1491,0.1497,0.1493,0.1493,0.1505,0.1513,0.1494,0.1471,0.1448,0.1426,0.1349,0.1261,0.124,0.1281,0.125,0.1161,0.1093,0.1074,0.1126,0.1185,0.1085,0.0964,0.1076,0.128,0.1391,0.1328,0.1184,0.1261,0.1422,0.1506,0.1538,0.1549,0.1543,0.1552,0.1565,0.1538,0.1516,0.1522,0.1503,0.143,0.1322,0.1206,0.1183,0.1327,0.1254,0.0927,0.0898,0.1028,0.1172,0.1142,0.0792,0.0748,0.107,0.1309,0.1402,0.1337,0.1176,0.1108,0.1325,0.1535,0.1591,0.1591,0.1562,0.1596,0.164,0.1621,0.1619,0.1647,0.1622,0.1525,0.135,0.1146,0.1088,0.1255,0.1229,0.0859,0.0612,0.0701,0.0849,0.1026,0.0825,0.0534,0.0622,0.0987,0.128,0.1272,0.0888,0.0674,0.1026,0.1322,0.1452,0.1496,0.1506,0.1558,0.1674,0.1734,0.1789,0.187,0.1837,0.1773,0.1621,0.1388,0.1364,0.1539,0.1482,0.1095,0.0656,0.0406,0.0565,0.1022,0.1062,0.0251,-0.0595,0.0031,0.067,0.0843,0.0347,-0.0944,-0.1575,0.0018,0.1017,0.1112,0.0789,0.0597,0.1067,0.1551,0.1789,0.1987,0.2132,0.2089,0.2021,0.1912,0.1954,0.2295,0.2369,0.2123,0.1697,0.1001,0.0482,0.0958,0.1333,0.0942,0.0058,-0.1131,-0.1349,-0.0619,-0.0449],"lo":[0.1212,0.1225,0.1155,0.1082,0.1048,0.1021,0.0935,0.0812,0.0722,0.0744,0.0854,0.0865,0.0657,0.0755,0.0971,0.1081,0.1067,0.1001,0.1027,0.1108,0.1178,0.123,0.1238,0.1246,0.1256,0.1248,0.1197,0.1175,0.1208,0.1154,0.1008,0.091,0.09,0.0931,0.0893,0.0806,0.0746,0.0781,0.09,0.0961,0.0851,0.0703,0.0847,0.1034,0.1118,0.1121,0.1123,0.1155,0.1208,0.126,0.1271,0.1274,0.1273,0.1261,0.1163,0.1063,0.1053,0.1124,0.1066,0.0926,0.0811,0.0749,0.0787,0.0828,0.0645,0.0484,0.0632,0.086,0.0944,0.0771,0.0546,0.0717,0.0977,0.1087,0.1134,0.1161,0.1174,0.1228,0.1293,0.1299,0.1316,0.1359,0.1349,0.1258,0.1122,0.0986,0.0975,0.1187,0.1059,0.0651,0.0569,0.0656,0.0788,0.0687,0.0218,0.0247,0.0622,0.0842,0.0876,0.0696,0.0405,0.0368,0.0773,0.1076,0.1136,0.1125,0.1102,0.1207,0.1336,0.1374,0.1433,0.1524,0.1513,0.1392,0.1192,0.0976,0.0955,0.1215,0.1163,0.0628,0.0252,0.0392,0.0502,0.0692,0.0406,0.0065,0.0164,0.0528,0.0772,0.061,-0.0065,-0.0271,0.0324,0.0698,0.0831,0.0865,0.0858,0.0949,0.1204,0.1382,0.1534,0.1705,0.1721,0.167,0.1514,0.1334,0.1321,0.1321,0.1365,0.091,0.0251,-0.0073,0.0265,0.0886,0.0896,-0.0177,-0.1409,-0.0534,0.02,0.0187,-0.0732,-0.2618,-0.2857,-0.0661,0.0359,0.0247,-0.0445,-0.0767,0.0077,0.0839,0.1232,0.153,0.1784,0.1792,0.1803,0.1717,0.1409,0.139,0.1483,0.1442,0.1258,0.077,0.0175,0.0198,0.0589,0.0628,-0.0401,-0.201,-0.2293,-0.1261,-0.0999],"hi":[0.1503,0.1485,0.1399,0.1339,0.1322,0.1316,0.1308,0.1303,0.1319,0.1364,0.1434,0.1497,0.1492,0.1515,0.1603,0.1679,0.1718,0.1713,0.1701,0.1682,0.1673,0.1651,0.1621,0.1573,0.1527,0.1493,0.1458,0.1419,0.1403,0.139,0.1375,0.1371,0.1388,0.1414,0.1446,0.147,0.149,0.154,0.1619,0.17,0.1735,0.1707,0.1719,0.1768,0.1795,0.1794,0.1775,0.1738,0.1706,0.1676,0.1635,0.1593,0.1551,0.1526,0.15,0.1458,0.1427,0.1437,0.1439,0.1435,0.1444,0.1476,0.1527,0.1588,0.16,0.157,0.1624,0.1744,0.1836,0.1865,0.1817,0.1806,0.1836,0.186,0.1856,0.1835,0.1801,0.1767,0.1736,0.1696,0.164,0.1603,0.1583,0.1554,0.152,0.1479,0.1437,0.1468,0.1485,0.1372,0.1416,0.1537,0.1634,0.1679,0.1554,0.1509,0.1666,0.183,0.1939,0.1967,0.1927,0.1855,0.1874,0.1942,0.1961,0.1939,0.1878,0.1828,0.1815,0.1761,0.173,0.1764,0.1721,0.1599,0.1534,0.1447,0.1337,0.1335,0.1358,0.1225,0.1168,0.1317,0.1416,0.1511,0.1465,0.1338,0.14,0.1635,0.1877,0.1987,0.189,0.1728,0.1809,0.1944,0.201,0.2006,0.1962,0.1925,0.1929,0.1912,0.1976,0.2066,0.1994,0.1905,0.1679,0.1494,0.1413,0.1693,0.1596,0.125,0.1101,0.0984,0.0937,0.1174,0.1371,0.105,0.0497,0.0913,0.1433,0.1712,0.1661,0.1074,0.0416,0.1138,0.1814,0.1976,0.1845,0.1665,0.1804,0.2036,0.2095,0.2335,0.2481,0.24,0.2314,0.2159,0.2343,0.2834,0.2866,0.257,0.208,0.1411,0.0988,0.1635,0.2039,0.1415,0.0354,-0.0567,-0.0791,-0.0074,0.0456]},"T":{"mean":[0.0291,0.032,0.0362,0.0401,0.0419,0.0436,0.0475,0.0535,0.0575,0.052,0.0412,0.0354,0.0439,0.0443,0.032,0.0229,0.02,0.0207,0.0208,0.0199,0.0193,0.0198,0.0217,0.0246,0.0276,0.0308,0.0349,0.0386,0.0406,0.0443,0.0515,0.0537,0.051,0.0484,0.049,0.0516,0.054,0.0503,0.04,0.0307,0.0293,0.035,0.0326,0.0248,0.0198,0.0183,0.019,0.0203,0.0217,0.0232,0.0259,0.0297,0.0335,0.0372,0.0427,0.0475,0.0498,0.0508,0.0542,0.0612,0.0656,0.0626,0.0544,0.0484,0.0535,0.0647,0.0597,0.0434,0.0309,0.029,0.0355,0.0338,0.0253,0.0195,0.0169,0.0164,0.0181,0.0208,0.0228,0.0258,0.0304,0.0351,0.0397,0.0459,0.0534,0.0596,0.0609,0.0571,0.063,0.0929,0.095,0.0755,0.0567,0.0538,0.0785,0.092,0.0702,0.0458,0.0316,0.0286,0.0346,0.0403,0.0315,0.0186,0.0121,0.0111,0.0142,0.0177,0.0189,0.0217,0.0264,0.0321,0.0377,0.0448,0.0562,0.0679,0.0743,0.0731,0.0756,0.109,0.1336,0.1155,0.0882,0.0722,0.0847,0.1115,0.1096,0.0778,0.0464,0.0357,0.0543,0.0734,0.0535,0.0317,0.0208,0.0166,0.0171,0.0194,0.0173,0.0142,0.0148,0.0188,0.0249,0.032,0.0416,0.0554,0.067,0.0719,0.0769,0.1042,0.1344,0.1402,0.1262,0.0996,0.0829,0.134,0.2218,0.1698,0.0981,0.0657,0.0859,0.1807,0.2546,0.1422,0.0555,0.039,0.0623,0.0863,0.0616,0.0282,0.0125,0.0079,0.0081,0.0113,0.016,0.0229,0.0337,0.0459,0.0586,0.0707,0.0876,0.1263,0.1549,0.1461,0.1299,0.1335,0.1765,0.2638,0.2933,0.2209,0.1691],"lo":[0.0078,0.0087,0.01,0.0111,0.0118,0.0125,0.0139,0.0157,0.0169,0.0155,0.0125,0.011,0.0139,0.0138,0.01,0.0071,0.0062,0.0065,0.0064,0.006,0.0057,0.0058,0.0062,0.0071,0.008,0.009,0.0103,0.0115,0.0123,0.0136,0.0158,0.0166,0.0161,0.0155,0.016,0.017,0.0179,0.0167,0.0134,0.0104,0.0101,0.0121,0.0111,0.0083,0.0065,0.0059,0.0061,0.0065,0.0069,0.0073,0.0081,0.0093,0.0106,0.0119,0.0137,0.0154,0.0164,0.0171,0.0186,0.0211,0.0227,0.0219,0.0194,0.0175,0.0197,0.0238,0.0219,0.016,0.0115,0.0109,0.0135,0.0127,0.0093,0.007,0.0059,0.0056,0.0062,0.0071,0.0078,0.0088,0.0104,0.0122,0.014,0.0163,0.019,0.0214,0.0223,0.0216,0.0243,0.0355,0.0363,0.0294,0.0225,0.0218,0.032,0.0375,0.0287,0.0188,0.0131,0.0119,0.0145,0.0169,0.0131,0.0075,0.0046,0.0041,0.0055,0.0069,0.0072,0.0081,0.01,0.0124,0.0149,0.0178,0.0222,0.0269,0.03,0.0307,0.0326,0.0469,0.0571,0.05,0.039,0.0326,0.0386,0.0512,0.0506,0.036,0.0215,0.0166,0.0254,0.0346,0.0253,0.0149,0.0097,0.0077,0.0079,0.0091,0.008,0.0062,0.0062,0.008,0.0109,0.0142,0.0183,0.0243,0.0305,0.0343,0.0375,0.0505,0.0645,0.0679,0.0631,0.0514,0.0431,0.0699,0.1169,0.0898,0.052,0.0348,0.0451,0.0954,0.1417,0.0795,0.0303,0.0211,0.0338,0.0478,0.0351,0.0157,0.0066,0.0038,0.0037,0.0054,0.0079,0.0113,0.0171,0.025,0.0332,0.0406,0.05,0.071,0.0883,0.0885,0.0803,0.0818,0.1078,0.1631,0.1849,0.1391,0.1049],"hi":[0.0424,0.0469,0.0532,0.0592,0.0625,0.0655,0.0714,0.0801,0.0854,0.0772,0.0617,0.0537,0.0672,0.0664,0.0478,0.0343,0.0302,0.0316,0.0315,0.0296,0.0282,0.0285,0.0309,0.0351,0.0395,0.0442,0.0502,0.056,0.0595,0.0652,0.0751,0.0784,0.0752,0.072,0.0734,0.0772,0.0805,0.0745,0.0594,0.0463,0.0453,0.0544,0.0496,0.0371,0.0293,0.0271,0.0278,0.0293,0.0309,0.0326,0.036,0.0413,0.0469,0.0523,0.0598,0.0671,0.0713,0.0733,0.0786,0.0884,0.0942,0.0901,0.0792,0.0715,0.0803,0.0961,0.0873,0.0636,0.0461,0.0449,0.0559,0.0518,0.0378,0.0286,0.0243,0.023,0.025,0.0284,0.0304,0.0349,0.0411,0.0467,0.0529,0.0611,0.0711,0.0799,0.083,0.0793,0.0892,0.1268,0.1271,0.1029,0.0793,0.0781,0.1149,0.1295,0.098,0.0649,0.0463,0.0441,0.0555,0.0639,0.0476,0.0271,0.0169,0.0155,0.0204,0.0243,0.0258,0.031,0.0381,0.0456,0.0524,0.062,0.0786,0.0946,0.1009,0.0957,0.0985,0.1416,0.1814,0.1535,0.1132,0.0958,0.1151,0.1493,0.1437,0.1029,0.0634,0.0523,0.0845,0.1116,0.079,0.0475,0.0325,0.0274,0.0295,0.0327,0.0252,0.0192,0.0227,0.0294,0.0384,0.0483,0.0632,0.0838,0.0976,0.0997,0.1031,0.1424,0.1886,0.194,0.1685,0.1275,0.1048,0.1744,0.2819,0.2177,0.1222,0.0873,0.1233,0.265,0.3408,0.1826,0.0757,0.0595,0.1029,0.1418,0.0952,0.0422,0.0179,0.0104,0.0111,0.0172,0.0261,0.0387,0.0557,0.0721,0.0881,0.1023,0.1239,0.1825,0.2211,0.1969,0.1684,0.1677,0.2183,0.3324,0.3764,0.2759,0.2024]},"SE":{"mean":[16.3685,15.9366,15.3906,14.9459,14.7334,14.539,14.1564,13.6325,13.3113,13.7354,14.722,15.3654,14.4185,14.3834,15.7901,17.2463,17.8537,17.702,17.6849,17.8896,18.041,17.9402,17.5611,17.0144,16.4993,16.0184,15.4753,15.0303,14.7869,14.3934,13.7347,13.5526,13.7546,13.9671,13.8962,13.6679,13.4622,13.7647,14.754,15.8901,16.095,15.3255,15.6228,16.831,17.8291,18.1727,18.0308,17.7493,17.4615,17.1645,16.7003,16.106,15.5697,15.0962,14.5031,14.027,13.8021,13.6998,13.3994,12.8672,12.5596,12.7524,13.3434,13.845,13.4019,12.5703,12.9134,14.2941,15.7667,16.0539,15.1717,15.3835,16.6557,17.7985,18.4304,18.5762,18.1652,17.5513,17.1572,16.6156,15.8984,15.2536,14.7123,14.0758,13.4109,12.924,12.8094,13.0601,12.6198,10.9345,10.836,11.8178,13.0463,13.269,11.6242,10.9202,12.0901,13.9499,15.5578,16.0159,15.2166,14.5463,15.5948,17.8809,19.78,20.184,19.0956,18.1062,17.844,17.2901,16.4271,15.5456,14.8267,14.0641,13.0884,12.2664,11.8516,11.8801,11.71,10.1227,9.2476,9.8636,11.0139,11.869,11.1702,9.965,10.0315,11.5173,13.7684,14.9268,13.1444,11.815,13.1691,15.4585,17.3081,18.3449,18.3008,17.6998,18.0765,18.9773,18.8509,17.8379,16.5742,15.4691,14.3372,13.0905,12.2139,11.8465,11.5259,10.2168,9.1293,8.9331,9.3539,10.3487,11.1417,9.0536,6.8546,8.0125,10.3914,12.1446,11.0138,7.7917,6.2235,8.7388,12.8564,14.4629,12.5246,11.0918,12.4646,15.8374,19.38,21.4344,21.3729,19.9303,18.4633,16.9635,15.2362,13.7834,12.662,11.8031,10.8658,9.2974,8.3955,8.5809,9.0651,8.9461,7.7329,5.9817,5.5133,6.7396,7.9074],"lo":[13.7275,13.2852,12.7374,12.2753,12.0446,11.8399,11.4638,10.9664,10.6832,11.1244,12.0999,12.698,11.728,11.777,13.2022,14.647,15.2,15.0083,15.0175,15.2843,15.5013,15.4565,15.0969,14.55,14.0316,13.5496,12.9934,12.5193,12.2548,11.8606,11.2414,11.0575,11.2358,11.4257,11.3449,11.122,10.9446,11.2775,12.2629,13.3459,13.4395,12.6476,13.042,14.302,15.3259,15.6742,15.5548,15.3279,15.1048,14.8685,14.4371,13.8389,13.2891,12.818,12.2296,11.7304,11.4708,11.3483,11.0438,10.5367,10.2608,10.4531,11.0125,11.4576,10.9509,10.1725,10.5917,11.964,13.3627,13.4766,12.5291,12.8558,14.2236,15.4344,16.1473,16.3773,16.0189,15.4624,15.1756,14.5704,13.8645,13.3076,12.767,12.1389,11.4808,10.9741,10.8099,11.0054,10.4971,8.9678,8.96,9.8762,11.0049,11.0746,9.3974,8.8779,10.0887,11.8764,13.3429,13.5568,12.5553,11.9483,13.2208,15.6773,17.7084,18.0876,16.9118,16.1406,15.8855,15.0863,14.1917,13.4125,12.8101,12.0783,11.0467,10.2411,9.963,10.1928,10.0638,8.4889,7.414,8.1401,9.4626,10.1864,9.3881,8.2603,8.4245,9.8763,11.9776,12.8135,10.7335,9.5235,11.0229,13.2319,14.8827,15.6298,15.3047,14.8548,15.9819,17.1654,16.4438,15.3093,14.1553,13.1646,11.994,10.7665,10.1056,10.0119,9.8662,8.4643,7.2448,7.1225,7.7343,8.9453,9.7954,7.5858,5.4995,6.6214,9.1276,10.5921,9.0913,5.7681,4.6749,7.3861,11.2082,12.2565,9.8739,8.4837,10.2141,13.7451,17.4631,19.8297,19.5459,17.6339,15.8351,14.1248,12.5388,11.4197,10.5512,9.9032,9.0679,7.3875,6.5546,7.0569,7.7356,7.7549,6.6089,4.7832,4.244,5.593,6.9383],"hi":[21.0601,20.5815,20.0184,19.5462,19.2749,19.0144,18.5837,18.0407,17.7155,18.0988,19.0156,19.5719,18.5824,18.5918,20.0013,21.4626,22.0662,21.9035,21.9281,22.2032,22.4326,22.3924,22.0485,21.4959,20.9511,20.4484,19.8908,19.4074,19.0937,18.6508,18.001,17.7946,17.9392,18.0829,17.9562,17.6931,17.4705,17.7619,18.7243,19.8295,19.9724,19.174,19.5274,20.7984,21.865,22.2654,22.1528,21.8953,21.6384,21.371,20.9282,20.3231,19.744,19.236,18.6374,18.1336,17.8501,17.6715,17.3142,16.7601,16.4371,16.5967,17.1329,17.5638,17.0637,16.2335,16.5879,17.9553,19.398,19.6156,18.6893,18.9687,20.3161,21.5474,22.2698,22.4913,22.0971,21.46,21.0857,20.5729,19.8396,19.1304,18.5366,17.8819,17.2053,16.69,16.5117,16.6522,16.1364,14.4965,14.398,15.3238,16.4755,16.6221,14.952,14.2648,15.4228,17.2631,18.842,19.2443,18.3771,17.7083,18.8303,21.2453,23.3323,23.8293,22.6355,21.6041,21.413,20.9065,20.021,19.0631,18.2719,17.4911,16.5335,15.7071,15.2258,15.1263,14.8738,13.292,12.4328,13.0071,14.0918,14.8712,14.1333,12.9097,12.9601,14.4318,16.6709,17.7923,15.9445,14.6068,15.972,18.2782,20.1261,21.1359,21.0431,20.4215,20.9729,22.099,22.0467,20.9769,19.636,18.4887,17.3812,16.1378,15.163,14.6491,14.2609,12.967,11.9038,11.6796,12.0009,12.891,13.6599,11.5559,9.3232,10.4663,12.8358,14.589,13.4617,10.2027,8.4868,10.9938,15.187,16.7593,14.7111,13.2068,14.5495,18.034,21.8062,24.1809,24.2744,22.6843,21.0438,19.4846,17.6597,16.0262,14.7924,13.9186,13.014,11.4873,10.5409,10.53,10.9502,10.8719,9.6738,7.8744,7.3305,8.5656,9.7911]},"summary":[{"n":1,"R":0.812,"A":0.117,"T":0.0717,"SE":12.6,"SER":7.4,"SEA":5.3,"negA":23},{"n":2,"R":0.822,"A":0.151,"T":0.0262,"SE":17.5,"SER":7.5,"SEA":10.0,"negA":6},{"n":3,"R":0.835,"A":0.089,"T":0.0758,"SE":12.2,"SER":8.1,"SEA":4.1,"negA":29}],"post":{"er":[61.1,841.8,851.5,813.9,753.0,103.6,753.7,768.3,881.4,47.0,49.1,58.3,777.2,68.1,67.4,14.1,776.2,763.6,776.4,771.9,7.3,901.4,839.5,791.2,846.3,862.6,783.8,822.4,804.1,705.3,731.7,765.9,742.3,788.2,803.0,59.6,818.1,42.5,60.4,810.7,67.8,854.0,760.5,98.3,737.4,769.5,729.7,808.4,896.9,809.5,831.3,781.2,81.2,820.1,864.2,632.7,46.0,838.1,74.4,54.9,761.4,55.6,767.9,60.1,770.1,60.5,66.0,781.7,65.2,754.3,75.8,646.4,792.7,62.1,756.1,50.8,810.7,802.2,775.3,823.3,730.1,807.9,742.7,52.6,698.4,728.0,732.3,762.2,21.9,663.3,810.4,788.5,676.2,765.0,838.8,755.3,71.3,71.4,828.7,64.3,715.4,779.4,63.1,751.4,796.2,814.7,78.4,799.5,824.0,75.6,856.3,73.9,789.9,816.3,889.3,842.2,842.9,746.1,827.8,58.9,776.0,67.1,62.9,721.5,66.6,801.4,818.4,74.8,802.1,68.7,831.8,57.1,821.8,782.9,83.7,823.4,720.2,58.9,43.8,770.6,765.3,795.9,79.6,38.3,786.2,752.4,839.2,821.7,792.0,49.1,781.5,747.1,815.3,70.2,822.7,78.7,52.4,46.8,828.8,698.7,40.5,615.6,915.1,898.7,45.7,11.1,76.3,794.8,46.2,706.6,741.1,804.3,837.6,47.8,68.0,823.7,826.0,76.9,759.3,877.3,784.6,833.1,766.8,51.1,826.8,845.0,809.0,47.5,870.0,777.4,798.7,859.8,857.0,815.4,879.2,778.5,759.4,895.2,847.3,862.5,776.1,42.6,788.2,750.3,778.5,828.5,777.9,69.0,797.3,59.8,38.9,875.5,826.1,683.9,847.7,37.0,62.2,772.7,775.8,794.4,71.8,795.4,761.7,61.4,794.5,71.4,55.2,736.0,815.6,842.5,67.8,777.4,764.6,771.1,19.1,85.1,790.4,778.7,775.5,767.9,42.2,58.4,838.1,899.9,72.7,773.4,68.8,800.5,835.3,95.1,804.8,82.0,818.0,55.4,828.2,797.2,728.4,844.6,51.2,80.2,788.9,66.1,866.4,42.5,765.4,752.6,777.7,846.8,49.2,789.5,754.4,737.9,56.2,823.5,86.0,71.6,58.9,834.7,816.4,790.7,743.2,784.7,78.1,745.5,740.5,740.7,83.6,800.7,762.1,778.0,773.0,71.2,69.0,810.6,790.1,866.8,41.1,829.8,42.8,815.8,782.3,826.7,67.4,70.3,799.0,817.0,774.1,71.3,807.8,827.9,61.1,727.1,805.4,781.2,836.6,813.7,729.6,752.4,845.4,56.3,98.3,70.2,836.7,60.6,750.0,769.0,784.1,64.8,782.4,810.0,824.0,732.6,823.9,776.8,875.8,790.7,816.9,789.0,812.3,699.1,724.3,850.9,744.7,52.2,734.2,32.1,833.3,99.1,862.7,78.6,758.6,872.0,56.6,862.6,852.2,813.9,766.0,795.4,724.3,51.4,826.3,704.9,709.4,792.9,82.8,69.5,772.8,742.0,808.1,798.1,66.1,768.9,767.6,69.8,812.6,842.6,41.7,785.8,834.3,744.3,78.0,779.8,75.3,757.7,824.8,846.7,45.4,804.7,752.7,789.7,626.4,851.3,746.9,59.7,620.1,899.3,783.1,63.1,852.8,891.1],"sig":[21.04,18.25,10.65,58.74,2.69,49.87,10.27,9.49,35.6,4.77,3.81,14.73,29.78,24.72,12.21,70.26,19.65,11.3,6.33,28.41,65.62,54.22,23.42,23.84,3.08,3.51,1.67,64.08,9.07,66.39,6.34,62.46,5.09,27.92,14.29,11.75,15.88,1.66,7.11,16.27,25.08,25.24,54.68,29.68,38.25,1.96,9.2,12.67,16.05,13.34,29.53,50.43,31.1,60.09,20.16,83.07,4.83,9.71,18.45,11.39,5.39,11.86,39.78,61.15,3.47,23.41,26.97,21.54,27.98,11.35,24.72,72.53,34.37,35.67,9.91,7.77,36.73,8.42,8.66,21.62,52.9,60.7,25.09,7.71,44.54,6.42,63.43,16.08,64.95,63.98,11.08,14.39,76.66,57.87,1.82,49.4,32.52,14.3,24.67,18.53,16.35,9.31,19.44,3.98,1.15,10.26,35.61,23.2,33.41,34.29,38.84,26.81,15.87,12.52,24.0,13.23,22.15,6.32,35.27,19.39,8.09,56.93,17.25,57.1,19.91,29.19,8.12,47.06,12.75,17.0,29.3,35.16,2.26,30.68,29.7,23.28,21.46,13.69,3.83,9.42,7.02,10.94,26.86,1.18,5.41,51.58,7.91,38.89,13.95,7.23,11.16,72.16,13.85,34.28,14.68,24.39,7.81,3.34,4.74,30.7,1.48,43.87,36.99,19.75,5.6,79.66,21.4,5.8,4.42,7.5,40.53,10.9,15.86,5.27,19.42,8.81,16.9,46.42,23.33,24.52,3.42,11.98,15.89,5.42,9.91,19.16,1.74,7.28,45.07,16.03,29.79,14.3,33.74,14.68,18.64,14.71,30.92,3.96,12.27,5.36,3.98,2.52,26.93,19.66,10.72,21.46,13.79,18.69,1.17,16.46,1.33,10.71,14.95,58.01,9.81,1.39,12.36,35.05,18.98,57.25,10.89,4.59,17.72,14.65,9.71,34.23,13.02,7.46,5.69,29.51,56.95,26.2,25.15,48.23,80.0,25.52,4.8,9.43,5.0,13.02,2.69,14.5,9.64,7.59,33.34,30.62,41.78,7.29,29.22,20.04,12.25,59.57,3.0,3.99,25.13,16.93,33.27,40.59,8.32,29.31,29.49,17.79,22.79,2.64,9.77,28.3,2.25,18.94,6.79,41.99,39.25,50.58,9.77,31.78,41.08,12.13,22.22,12.55,73.51,5.52,34.69,9.84,19.63,29.3,35.36,14.85,17.71,0.63,59.39,1.42,24.29,16.67,17.63,9.0,48.82,20.92,2.15,24.67,3.08,24.82,35.08,3.21,10.52,34.83,15.37,17.65,1.73,14.72,11.29,20.79,18.39,33.15,47.95,13.82,3.79,16.0,8.56,10.72,14.03,9.79,52.57,17.09,21.88,16.13,6.36,22.17,64.44,13.82,8.6,14.21,64.89,45.61,2.32,26.63,29.32,4.4,28.09,17.22,48.46,59.68,27.95,45.52,14.29,9.46,78.68,0.62,13.32,46.9,36.6,23.14,90.73,23.46,8.21,35.5,6.88,0.97,8.9,18.54,30.34,4.5,12.24,50.67,35.6,43.56,40.16,12.86,7.01,5.76,49.98,12.35,51.13,15.45,24.21,20.08,17.22,4.94,4.1,34.7,26.06,21.34,28.38,8.52,31.77,95.97,9.88,16.85,2.79,5.5,0.79,16.33,52.88,34.91,5.45,44.11,43.35,49.73,26.0,8.84,9.53,21.9]}};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===== MODEL START =====
+const M = (function(){
+  const C0 = 299792458, E0 = 8.854187817e-12, AWG = 22.86e-3;
+  const PRIOR = {wc:[0.08,0.25], t:[1.6,2.6], k:[1.0,2.5], ep:[2.3,3.2], td:[0.005,0.03], al:[0.0,0.3]};
+  function rng(seed){ let a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  // complex helpers on [re,im]
+  const cmul=(a,b)=>[a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]];
+  const cdiv=(a,b)=>{const d=b[0]*b[0]+b[1]*b[1]; return [(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d];};
+  const cadd=(a,b)=>[a[0]+b[0],a[1]+b[1]], csub=(a,b)=>[a[0]-b[0],a[1]-b[1]];
+  function csqrt(a){ const r=Math.hypot(a[0],a[1]); let re=Math.sqrt(Math.max(0,(r+a[0])/2)), im=Math.sqrt(Math.max(0,(r-a[0])/2)); if(a[1]<0) im=-im; return [re,im]; }
+  const cexp=a=>{const e=Math.exp(a[0]); return [e*Math.cos(a[1]), e*Math.sin(a[1])];};
+  function ctanh(a){ // tanh(x+jy)
+    const x=a[0], y=a[1];
+    if (Math.abs(x)>20) return [Math.sign(x),0];
+    const d=Math.cosh(2*x)+Math.cos(2*y); return [Math.sinh(2*x)/d, Math.sin(2*y)/d];
+  }
+  // index of refraction with Im<=0 (e^{jwt}, lossy eps has negative imaginary part)
+  function nOf(eps){ let n=csqrt(eps); if(n[1]>0) n=[n[0],-n[1]]; return n; }
+
+  function epsCal(f, er, sig){ return [er, -sig/(2*Math.PI*f*1e9*E0)]; }
+  function material(w, er60, sig60, p, f){
+    const lnE = Math.log(p.ep) + (Math.log(er60)-Math.log(p.ep))*Math.pow(Math.max(w/0.6,0), p.k);
+    const er = Math.exp(lnE);
+    const x = Math.max(0,(w-p.wc)/(0.6-p.wc));
+    const sig = sig60*Math.pow(x,p.t);
+    const ei = sig/(2*Math.PI*f*1e9*E0) + p.ep*p.td*Math.max(0,1-w/0.6);
+    return [er*Math.pow(f/10,-p.al), -ei];
+  }
+  function wgSlab(f, eps, d){
+    const k0=2*Math.PI*f*1e9/C0, kc=Math.PI/AWG;
+    const b0=csqrt([k0*k0-kc*kc,0]);
+    let b=csqrt([k0*k0*eps[0]-kc*kc, k0*k0*eps[1]]); if(b[1]>0) b=[-b[0],-b[1]];
+    const G=cdiv(csub(b0,b),cadd(b0,b));
+    const P=cexp(cmul([0,-1],[b[0]*d,b[1]*d]));
+    const P2=cmul(P,P), G2=cmul(G,G);
+    const den=csub([1,0],cmul(G2,P2));
+    const S11=cdiv(cmul(G,csub([1,0],P2)),den), S21=cdiv(cmul(P,csub([1,0],G2)),den);
+    return {R:S11[0]**2+S11[1]**2, T:S21[0]**2+S21[1]**2};
+  }
+  // layers: array of {eps:[re,im], d} from OUTER to INNER; metal backed. returns RL dB
+  function rlDb(f, layers){
+    const k0=2*Math.PI*f*1e9/C0; let Z=null;
+    for(let i=layers.length-1;i>=0;i--){
+      const n=nOf(layers[i].eps), ZL=cdiv([1,0],n);
+      const t=ctanh(cmul([0,k0*layers[i].d],n));
+      if(Z===null) Z=cmul(ZL,t);
+      else Z=cdiv(cmul(ZL,cadd(Z,cmul(ZL,t))), cadd(ZL,cmul(Z,t)));
+    }
+    const G=cdiv(csub(Z,[1,0]),cadd(Z,[1,0]));
+    return 20*Math.log10(Math.hypot(G[0],G[1])+1e-12);
+  }
+  function sheet(f, eps, d){
+    const k0=2*Math.PI*f*1e9/C0, n=nOf(eps);
+    const G=cdiv(csub([1,0],n),cadd([1,0],n));
+    const P=cexp(cmul([0,-k0*d],n));
+    const P2=cmul(P,P), G2=cmul(G,G), den=csub([1,0],cmul(G2,P2));
+    const S11=cdiv(cmul(G,csub([1,0],P2)),den), S21=cdiv(cmul(P,csub([1,0],G2)),den);
+    const R=S11[0]**2+S11[1]**2, T=S21[0]**2+S21[1]**2;
+    return {R,T,A:1-R-T,SE:-10*Math.log10(T)};
+  }
+
+  // free-standing multilayer in free space via ABCD matrices (normalised to Z0=1). layers outer->inner
+  function ccos(a){ return [Math.cos(a[0])*Math.cosh(a[1]), -Math.sin(a[0])*Math.sinh(a[1])]; }
+  function csin(a){ return [Math.sin(a[0])*Math.cosh(a[1]), Math.cos(a[0])*Math.sinh(a[1])]; }
+  function stack(f, layers){
+    const k0=2*Math.PI*f*1e9/C0; let A=[1,0],B=[0,0],Cc=[0,0],Dd=[1,0];
+    for(const L of layers){
+      const n=nOf(L.eps), Z=cdiv([1,0],n), kd=[k0*L.d*n[0], k0*L.d*n[1]];
+      const c=ccos(kd), s=csin(kd);
+      const a=c, b=cmul([0,1],cmul(Z,s)), cc=cdiv(cmul([0,1],s),Z), d=c;
+      const nA=cadd(cmul(A,a),cmul(B,cc)), nB=cadd(cmul(A,b),cmul(B,d)), nC=cadd(cmul(Cc,a),cmul(Dd,cc)), nD=cadd(cmul(Cc,b),cmul(Dd,d));
+      A=nA;B=nB;Cc=nC;Dd=nD;
+    }
+    const den=cadd(cadd(A,B),cadd(Cc,Dd));
+    const S21=cdiv([2,0],den), S11=cdiv(csub(cadd(A,B),cadd(Cc,Dd)),den);
+    const R=S11[0]**2+S11[1]**2, T=S21[0]**2+S21[1]**2;
+    return {R,T,A:1-R-T,SE:-10*Math.log10(T)};
+  }
+  function draws(post, N, reading, seed){
+    const r=rng(seed), idx=[];
+    for(let i=0;i<post.er.length;i++){ const isA=post.er[i]<200; if(reading==='both'||(reading==='A'&&isA)||(reading==='B'&&!isA)) idx.push(i); }
+    const u=(k)=>PRIOR[k][0]+(PRIOR[k][1]-PRIOR[k][0])*r();
+    const out=[];
+    for(let i=0;i<N;i++){
+      const j=idx[Math.floor(r()*idx.length)];
+      out.push({er60:post.er[j], sig60:post.sig[j], p:{wc:u('wc'),t:u('t'),k:u('k'),ep:u('ep'),td:u('td'),al:u('al')}});
+    }
+    return out;
+  }
+  function epsFor(w, dr, f){ return w>=0.6 ? (function(){const e=epsCal(f,dr.er60,dr.sig60); return e;})() : material(w, dr.er60, dr.sig60, dr.p, f); }
+  function quant(arr,q){ const a=Float64Array.from(arr).sort(); const pos=(a.length-1)*q, lo=Math.floor(pos), hi=Math.ceil(pos); return a[lo]+(a[hi]-a[lo])*(pos-lo); }
+  function density(w){ return 1/(w/2.2+(1-w)/1.2); }
+  return {rng, stack, material, wgSlab, rlDb, sheet, draws, epsFor, epsCal, quant, density, PRIOR};
+})();
+// ===== MODEL END =====
+
+// ===== STORY =====
+const STORY = [
+ {id:'hero', nav:'Start', station:'space', cam:'wide', lines:[
+  ['A','Electromagnetic energy surrounds every modern platform, from communication links and radar to the electronics inside a spacecraft.'],
+  ['B','So here is our question. Can we engineer the material itself to control what happens to that energy?']]},
+ {id:'energy', nav:'Energy', station:'space', cam:'earth', lines:[
+  ['A','When we build a drone, aircraft or defence platform, electromagnetic energy is both useful and potentially problematic. Radar must detect objects. Communication systems must transmit information. At the same time, sensitive electronics must be protected from unwanted interference.'],
+  ['B','That is where electromagnetic materials become important. Instead of treating the surface as simply structural, we can engineer the material to interact with electromagnetic waves in a controlled way.'],
+  ['A','So the question is not simply whether a material blocks electromagnetic waves?'],
+  ['B','Exactly. We need to understand whether the energy is reflected, absorbed, transmitted or dissipated.']]},
+ {id:'emi', nav:'EMI', station:'ground', cam:'avionics', lines:[
+  ['A','Start with EMI shielding. Without a shield, stray energy reaches the electronics directly.'],
+  ['B','With a shield, part of the energy reflects, part is absorbed, and much less reaches the circuit. We express this as shielding effectiveness, in decibels. Twenty decibels means ninety-nine percent of the power is stopped.'],
+  ['A','And more reflection is not automatically better. Reflected energy has to go somewhere.']]},
+ {id:'ram', nav:'RAM', station:'ground', cam:'radar', lines:[
+  ['A','Radar is a different problem. A radar sends a pulse and listens for the echo. A bare metal drone sends a strong echo straight back.'],
+  ['B','A radar-absorbing material is designed to reduce the energy returned toward the radar, by easing the wave into the surface and then absorbing it.'],
+  ['A','To be clear, that means a potential reduction in electromagnetic signature under specific conditions. Not invisibility.']]},
+ {id:'compare', nav:'EMI vs RAM', station:'ground', cam:'both', lines:[
+  ['B','EMI shielding asks how much energy reaches the electronics. Radar absorption asks how much energy returns toward the source.'],
+  ['A','Same material platform. Different design target.']]},
+ {id:'material', nav:'Material', station:'lab', cam:'exploded', lines:[
+  ['B','Bhavira’s platform is a polymer filled with graphite. When enough graphite flakes touch, they form a conductive network inside the plastic.'],
+  ['A','The dials we can turn include filler loading, thickness, layer architecture, dispersion and the interfaces between layers.']]},
+ {id:'tuning', nav:'Design', station:'lab', cam:'slab', lines:[
+  ['B','Try the sliders. More graphite raises conductivity, which usually means more reflection. Thickness and layering change how the wave travels inside.'],
+  ['A','Every number outside our tested recipe is a modelled estimate, and it is labelled that way.']]},
+ {id:'measured', nav:'Our data', station:'lab', cam:'sample', lines:[
+  ['A','Here is what we have measured. Three samples, sixty percent graphite, half a millimetre thick, across eight to twelve gigahertz.'],
+  ['B','They reflect about eighty-two percent, absorb nine to fifteen percent, and give twelve to eighteen decibels of shielding. At this composition the material behaves like a reflective EMI shield, not a strong radar absorber.'],
+  ['A','Further controlled measurements are required to optimise absorption.']]},
+ {id:'space-map', nav:'Design space', station:'lab', cam:'slab', lines:[
+  ['B','This map shows the design space. One point is measured. Everything else is modelled or untested, and we keep those categories separate.']]},
+ {id:'insight', nav:'Model', station:'lab', cam:'layers', lines:[
+  ['A','Our model suggests that lower graphite content and more thickness may be a pathway toward greater absorption. But the current dataset is too limited to establish an optimum.'],
+  ['B','The candidate regions are around thirty to forty percent graphite at two to two and a half millimetres, or a two-layer stack. These are predictions, not validated results.']]},
+ {id:'multilayer', nav:'Multilayer', station:'lab', cam:'layers', lines:[
+  ['B','Why multiple layers? The outer layer can ease the wave in, an inner layer can absorb it, and each interface adds control over internal reflections and loss.']]},
+ {id:'apps', nav:'Applications', station:'ground', cam:'wide', lines:[
+  ['A','Potential defence uses range from electronics protection on drones and aircraft to sensor housings on ground systems.'],
+  ['B','And in space, potential lightweight electromagnetic protection for satellite and spacecraft electronics. All of these need validation.']]},
+ {id:'mars', nav:'Space', station:'mars', cam:'surface', lines:[
+  ['B','Space systems operate in an electromagnetic environment where communication, sensing and electronic protection must coexist.'],
+  ['A','Future materials may need to combine structural performance, low mass, durability and electromagnetic function. For Bhavira, this is a concept for future validation.']]},
+ {id:'function', nav:'One platform', station:'lab', cam:'exploded', lines:[
+  ['A','One material, different functions. A thin, graphite-rich layer leans toward shielding.'],
+  ['B','Less graphite and more thickness may increase absorption. A multilayer design lets us engineer impedance.'],
+  ['A','Material composition is not simply a manufacturing parameter. It can become a design variable.']]},
+ {id:'sustain', nav:'Weight', station:'lab', cam:'slab', lines:[
+  ['B','The platform is polymer-based, so it is potentially lightweight, corrosion-resistant and easy to process, and it may use recycled feedstock. We will quantify environmental benefits only once we have the data.']]},
+ {id:'question', nav:'Big question', station:'space', cam:'wide', lines:[
+  ['A','So, can one material platform be tuned for different electromagnetic problems?'],
+  ['B','Same platform. Different architecture. Different electromagnetic response.']]},
+ {id:'roadmap', nav:'Roadmap', station:'space', cam:'earth', lines:[
+  ['A','We are at the laboratory stage. We have made the material and taken our first X-band measurements.'],
+  ['B','Next come composition and thickness screening, other frequency bands, free-space tests, then environmental, thermal and vacuum testing before any prototype.']]},
+ {id:'engineer', nav:'Engineer', station:'lab', cam:'slab', lines:[
+  ['B','Engineer mode shows permittivity, loss tangent, surface resistance and areal mass for any design, each tagged as measured, modelled or target.']]},
+ {id:'caution', nav:'Known vs unknown', station:'space', cam:'mars', lines:[
+  ['A','What do we know? Our first sixty-forty measurements in the X band. What is modelled? Other compositions, thicknesses and multilayer designs.'],
+  ['B','And what is not yet validated: full-scale signature reduction, spacecraft performance, vacuum, thermal cycling, radiation, durability and real-world radar detection range.']]},
+ {id:'investor', nav:'Partners', station:'space', cam:'earth', lines:[
+  ['A','Bhavira is developing a materials platform where electromagnetic performance can be engineered through composition, thickness and architecture.'],
+  ['B','We are not claiming a finished stealth material. We are building the experimental and modelling pathway to discover application-specific electromagnetic materials.']]},
+ {id:'final', nav:'Finish', station:'space', cam:'final', lines:[
+  ['A','So the future isn’t simply about making stronger materials.'],
+  ['B','It is about making materials that perform a function.'],
+  ['A','And controlling that function through material design.'],
+  ['B','From Earth to space.']]}
+];
+const MODES = {
+ full: STORY.map(c=>c.id),
+ investor: ['hero','question','measured','function','tuning','apps','insight','roadmap','caution','investor','final'],
+ scientist: ['hero','energy','material','measured','space-map','insight','multilayer','tuning','engineer','caution','roadmap','final'],
+ defence: ['hero','ram','emi','compare','apps','tuning','measured','insight','caution','roadmap','investor','final']
+};
+// ===== STORY END =====
+
+// ===== THREE SCENE =====
+const World = (function(){
+  if(!window.THREE) return null;
+  const canvas=document.getElementById('bg');
+  let renderer; try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'}); }catch(e){ return null; }
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x04060c);
+  const cam=new THREE.PerspectiveCamera(45,1,0.1,12000);
+  const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+  const r=M.rng(21);
+
+  // ---------- helpers ----------
+  function canvasTex(w,h,draw){ const c=document.createElement('canvas'); c.width=w; c.height=h; draw(c.getContext('2d'),w,h); const t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
+  function noise2(seed){ const rr=M.rng(seed), P=256, g=new Float32Array(P*P); for(let i=0;i<g.length;i++) g[i]=rr();
+    return (x,y,px)=>{ const xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi, u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+      const X0=((xi%px)+px)%px, X1=(X0+1)%px, Y0=((yi%P)+P)%P, Y1=(Y0+1)%P; const a=g[Y0*P+X0],b=g[Y0*P+X1],c=g[Y1*P+X0],d=g[Y1*P+X1];
+      return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v; }; }
+  function fbm(n,x,y,px,o){ let s=0,a=.5,f=1,nm=0; for(let i=0;i<o;i++){ s+=a*n(x*f,y*f,px*f); nm+=a; a*=.5; f*=2; } return s/nm; }
+  const mixc=(a,b,t)=>{ t=Math.max(0,Math.min(1,t)); return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]; };
+  function planet(seed,paint){ return canvasTex(512,256,(x,w,h)=>{ const n=noise2(seed), img=x.createImageData(w,h), d=img.data;
+    for(let j=0;j<h;j++){ const lat=Math.abs(j/h-.5)*2; for(let i=0;i<w;i++){ const v=fbm(n,i/w*8,j/h*4,8,5), c=paint(v,lat), k=(j*w+i)*4; d[k]=c[0]; d[k+1]=c[1]; d[k+2]=c[2]; d[k+3]=c.length>3?c[3]:255; } }
+    x.putImageData(img,0,0); }); }
+  const glowTex=canvasTex(64,64,(x)=>{ const g=x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.3,'rgba(255,255,255,.5)'); g.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=g; x.fillRect(0,0,64,64); });
+  function atmo(rad,color,pw){ return new THREE.Mesh(new THREE.SphereGeometry(rad,48,32),new THREE.ShaderMaterial({uniforms:{c:{value:new THREE.Color(color)},p:{value:pw}},
+    vertexShader:'varying vec3 vN;varying vec3 vV;void main(){vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 c;uniform float p;varying vec3 vN;varying vec3 vV;void main(){float f=pow(1.0-max(dot(vN,vV),0.0),p);gl_FragColor=vec4(c*f*1.4,f);}',
+    transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})); }
+  const coatMat=()=>new THREE.MeshBasicMaterial({color:0x38e1ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+  const coats=[];
+
+  scene.add(new THREE.AmbientLight(0x6f7fa8,0.35));
+  const sun=new THREE.DirectionalLight(0xfff1e0,1.6); sun.position.set(-1,0.5,0.8).multiplyScalar(1000); scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0x9ab8ff,0x201008,0.25));
+
+  // stars
+  { const N=4000,p=new Float32Array(N*3); for(let i=0;i<N;i++){ const u=r()*2-1, th=r()*Math.PI*2, R=9000, s=Math.sqrt(1-u*u); p[i*3]=R*s*Math.cos(th); p[i*3+1]=R*u; p[i*3+2]=R*s*Math.sin(th); }
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(p,3)); scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xcfd8ea,size:1.6,sizeAttenuation:false,transparent:true,opacity:.8}))); }
+
+  // ================= SPACE STATION (origin) =================
+  const space=new THREE.Group(); scene.add(space);
+  const earth=new THREE.Mesh(new THREE.SphereGeometry(20,64,48),new THREE.MeshStandardMaterial({roughness:.85,map:planet(21,(v,lat)=>{ if(lat>.9-(v-.5)*.3) return [232,240,250]; if(v>.52) return mixc([58,112,62],[152,128,86],(v-.52)*6); return mixc([8,26,74],[24,90,156],(v-.3)*4); })}));
+  space.add(earth); space.add(atmo(21.6,0x4ea8ff,3));
+  const clouds=new THREE.Mesh(new THREE.SphereGeometry(20.3,64,48),new THREE.MeshStandardMaterial({transparent:true,depthWrite:false,map:planet(77,v=>[255,255,255,Math.max(0,Math.min(1,(v-.52)/.18))*200])})); space.add(clouds);
+  const moon=new THREE.Mesh(new THREE.SphereGeometry(4.5,32,24),new THREE.MeshStandardMaterial({roughness:1,map:planet(5,v=>mixc([70,70,76],[190,188,184],(v-.3)*2.4))})); moon.position.set(-60,14,-36); space.add(moon);
+  const MARSP=V(190,12,-150);
+  const marsS=new THREE.Mesh(new THREE.SphereGeometry(13,64,48),new THREE.MeshStandardMaterial({roughness:.95,map:planet(42,(v,lat)=>{ if(lat>.93) return [240,226,214]; return v<.46?mixc([92,38,24],[168,74,40],(v-.3)/.16):mixc([178,84,44],[228,152,100],(v-.46)/.3); })}));
+  marsS.position.copy(MARSP); space.add(marsS); const ma=atmo(14,0xff7a45,3.5); ma.position.copy(MARSP); space.add(ma);
+  function satellite(scale){ const g=new THREE.Group(), gold=new THREE.MeshStandardMaterial({color:0xd4a64a,metalness:.6,roughness:.35});
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(1.6,1.6,2.2),gold));
+    const pm=new THREE.MeshStandardMaterial({color:0x1e3a8a,metalness:.4,roughness:.3,emissive:0x0a1a4a,emissiveIntensity:.6});
+    [-1,1].forEach(s=>{ const p=new THREE.Mesh(new THREE.BoxGeometry(5,.06,1.5),pm); p.position.x=s*3.4; g.add(p); });
+    const coat=new THREE.Mesh(new THREE.BoxGeometry(1.9,1.9,2.5),coatMat()); g.add(coat); coats.push(coat);
+    g.scale.setScalar(scale); return g; }
+  const sats=[satellite(1),satellite(.8),satellite(.9)]; sats.forEach(s=>space.add(s));
+  // spacecraft
+  const craft=new THREE.Group(); space.add(craft);
+  { const hull=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.4,6,20),new THREE.MeshStandardMaterial({color:0xc9d1dc,metalness:.5,roughness:.35})); hull.rotation.z=Math.PI/2; craft.add(hull);
+    const eng=new THREE.Mesh(new THREE.ConeGeometry(1.2,1.6,20),new THREE.MeshStandardMaterial({color:0x444c59,metalness:.6})); eng.rotation.z=Math.PI/2; eng.position.x=-3.6; craft.add(eng);
+    const flame=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x7fd6ff,blending:THREE.AdditiveBlending,depthWrite:false})); flame.scale.set(4,2.2,1); flame.position.x=-4.8; craft.add(flame);
+    const dish=new THREE.Mesh(new THREE.CylinderGeometry(1.6,.2,.5,24,1,true),new THREE.MeshStandardMaterial({color:0xeeeeee,side:THREE.DoubleSide})); dish.position.set(1,1.8,0); craft.add(dish);
+    [-1,1].forEach(s=>{ const p=new THREE.Mesh(new THREE.BoxGeometry(1.5,.06,5),new THREE.MeshStandardMaterial({color:0x1e3a8a,emissive:0x0a1a4a,emissiveIntensity:.6})); p.position.set(0,0,s*3.6); craft.add(p); });
+    const coat=new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.65,6.3,20,1,true),coatMat()); coat.rotation.z=Math.PI/2; craft.add(coat); coats.push(coat);
+  }
+  const route=new THREE.QuadraticBezierCurve3(V(24,4,-8),V(110,70,-40),MARSP.clone().add(V(-16,2,10)));
+  { const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(route.getPoints(120)),new THREE.LineDashedMaterial({color:0x9ad1ff,dashSize:3,gapSize:3,transparent:true,opacity:.35})); l.computeLineDistances(); space.add(l); }
+  const commDots=[]; for(let i=0;i<6;i++){ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x38e1ff,blending:THREE.AdditiveBlending,depthWrite:false})); s.scale.setScalar(2.2); space.add(s); commDots.push(s); }
+
+  // ================= GROUND RANGE (0,-3000,0) =================
+  const G0=V(0,-3000,0), ground=new THREE.Group(); ground.position.copy(G0); scene.add(ground);
+  { const gm=new THREE.Mesh(new THREE.CircleGeometry(160,64),new THREE.MeshStandardMaterial({color:0x0b111c,roughness:1})); gm.rotation.x=-Math.PI/2; ground.add(gm);
+    const grid=new THREE.GridHelper(300,90,0x22314b,0x131d2e); grid.position.y=.02; ground.add(grid);
+    const hl=new THREE.HemisphereLight(0x8fb2ff,0x0a0806,.5); ground.add(hl); }
+  const metal=new THREE.MeshStandardMaterial({color:0x8a94a6,metalness:.6,roughness:.4});
+  const RAD=V(-20,0,6), radar=new THREE.Group(); radar.position.copy(RAD); ground.add(radar);
+  { const b=new THREE.Mesh(new THREE.BoxGeometry(5,2,5),new THREE.MeshStandardMaterial({color:0x3b4658,roughness:.8})); b.position.y=1; radar.add(b);
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(.35,.45,5,12),metal); m.position.y=4.5; radar.add(m); }
+  const rhead=new THREE.Group(); rhead.position.y=7.2; radar.add(rhead);
+  { const d=new THREE.Mesh(new THREE.SphereGeometry(3,32,16,0,Math.PI*2,0,Math.PI*.32),new THREE.MeshStandardMaterial({color:0xdfe5ee,metalness:.3,roughness:.35,side:THREE.DoubleSide})); d.rotation.x=-Math.PI/2; d.position.z=2; rhead.add(d);
+    const f=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,2.6,6),metal); f.rotation.x=Math.PI/2; f.position.z=.2; rhead.add(f); }
+  const feedTip=new THREE.Object3D(); feedTip.position.z=1.5; rhead.add(feedTip);
+  // drone
+  const drone=new THREE.Group(); ground.add(drone); const D0=V(10,8,-1);
+  const skin=new THREE.MeshStandardMaterial({color:0x2a2f38,metalness:.25,roughness:.55,emissive:0x1fb584,emissiveIntensity:0});
+  const shell=new THREE.MeshStandardMaterial({color:0x2a2f38,metalness:.25,roughness:.55,transparent:true,opacity:.3,depthWrite:false,emissive:0x1fb584,emissiveIntensity:0});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.3,2.6),skin); drone.add(body);
+  drone.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry),new THREE.LineBasicMaterial({color:0x5b6b85})));
+  const rotors=[]; const armM=new THREE.MeshStandardMaterial({color:0x1b1f27,roughness:.6});
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,4.2,8),armM); arm.rotation.z=Math.PI/2; arm.rotation.y=-Math.atan2(sz,sx); arm.position.set(sx*1.5,.2,sz*1.5); drone.add(arm);
+    const mo=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.6,16),metal); mo.position.set(sx*3,.35,sz*3); drone.add(mo);
+    const ro=new THREE.Group(); ro.position.set(sx*3,.75,sz*3); drone.add(ro);
+    const bl=new THREE.Mesh(new THREE.BoxGeometry(3.2,.05,.28),new THREE.MeshStandardMaterial({color:0x10131a})); ro.add(bl); const b2=bl.clone(); b2.rotation.y=Math.PI/2; ro.add(b2);
+    const disc=new THREE.Mesh(new THREE.CircleGeometry(1.65,32),new THREE.MeshBasicMaterial({color:0x9fb3d1,transparent:true,opacity:.07,side:THREE.DoubleSide,depthWrite:false})); disc.rotation.x=-Math.PI/2; ro.add(disc); rotors.push(ro);
+  });
+  const avi=new THREE.Group(); avi.visible=false; drone.add(avi);
+  avi.add(new THREE.Mesh(new THREE.BoxGeometry(3.2,.08,2),new THREE.MeshStandardMaterial({color:0x0f6b3a})));
+  const chips=[]; [[-.9,.5],[.3,-.4],[1,.45]].forEach(([x,z])=>{ const c=new THREE.Mesh(new THREE.BoxGeometry(.6,.18,.6),new THREE.MeshStandardMaterial({color:0x14161b,emissive:0xff3b3b,emissiveIntensity:0})); c.position.set(x,.13,z); avi.add(c); chips.push(c); });
+  const hitGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x1fb584,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false})); hitGlow.scale.setScalar(9); drone.add(hitGlow);
+  // aircraft
+  const jet=new THREE.Group(); ground.add(jet);
+  { const jm=new THREE.MeshStandardMaterial({color:0x6c7686,metalness:.5,roughness:.45});
+    const f=new THREE.Mesh(new THREE.CylinderGeometry(.5,.9,9,12),jm); f.rotation.z=Math.PI/2; jet.add(f);
+    const n=new THREE.Mesh(new THREE.ConeGeometry(.5,2.2,12),jm); n.rotation.z=-Math.PI/2; n.position.x=5.6; jet.add(n);
+    const w=new THREE.Mesh(new THREE.BoxGeometry(3.2,.15,11),jm); w.position.x=.2; jet.add(w);
+    const t=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.2,.15),jm); t.position.set(-3.8,1.1,0); jet.add(t); }
+  const pulses=[];
+  function ring(color){ const m=new THREE.Mesh(new THREE.RingGeometry(1,1.18,48),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending})); scene.add(m); return m; }
+
+  // ================= MATERIAL LAB (3000,0,0) =================
+  const L0=V(3000,0,0), lab=new THREE.Group(); lab.position.copy(L0); scene.add(lab);
+  { const hl=new THREE.PointLight(0x38e1ff,1.2,120); hl.position.set(-20,25,20); lab.add(hl); const k=new THREE.DirectionalLight(0xffffff,.8); k.position.set(10,20,30); lab.add(k);
+    const pad=new THREE.Mesh(new THREE.CylinderGeometry(19,20,.6,6),new THREE.MeshStandardMaterial({color:0x0d111c,metalness:.6,roughness:.5})); pad.position.y=-2.4; lab.add(pad);
+    const ringL=new THREE.Mesh(new THREE.RingGeometry(18.6,19.4,6),new THREE.MeshBasicMaterial({color:0x38e1ff,transparent:true,opacity:.4,side:THREE.DoubleSide})); ringL.rotation.x=-Math.PI/2; ringL.position.y=-2.05; lab.add(ringL); }
+  const slab=new THREE.Group(); lab.add(slab);
+  const layerMeshes=[], ifaces=[];
+  for(let i=0;i<3;i++){
+    const g=new THREE.PlaneGeometry(22,22,48,48); // we'll use boxes for body and a plane for surface
+    const box=new THREE.Mesh(new THREE.BoxGeometry(22,1,22),new THREE.MeshStandardMaterial({color:0x2a2f38,roughness:.6,metalness:.15,transparent:true,opacity:.92}));
+    slab.add(box); layerMeshes.push(box);
+    const iface=new THREE.Mesh(new THREE.PlaneGeometry(22.4,22.4),new THREE.MeshBasicMaterial({color:0x38e1ff,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false})); iface.rotation.x=-Math.PI/2; slab.add(iface); ifaces.push(iface);
+  }
+  const surf=new THREE.Mesh(new THREE.PlaneGeometry(22,22,60,60),new THREE.MeshStandardMaterial({color:0x3a404c,roughness:.5,metalness:.2,side:THREE.DoubleSide})); surf.rotation.x=-Math.PI/2; slab.add(surf);
+  const surfBase=Float32Array.from(surf.geometry.attributes.position.array);
+  const backing=new THREE.Mesh(new THREE.BoxGeometry(22,.4,22),new THREE.MeshStandardMaterial({color:0xc9d1dc,metalness:.9,roughness:.25})); slab.add(backing);
+  const FL=260, flakes=new THREE.InstancedMesh(new THREE.CylinderGeometry(.9,.9,.08,6),new THREE.MeshStandardMaterial({color:0x9aa3b2,metalness:.7,roughness:.3}),FL);
+  const flakeP=[]; for(let i=0;i<FL;i++) flakeP.push({x:(r()*2-1)*10,y:r(),z:(r()*2-1)*10,q:new THREE.Quaternion().setFromEuler(new THREE.Euler(r()*6,r()*6,r()*6))});
+  slab.add(flakes);
+  const labWave=[]; for(let i=0;i<3;i++){ const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(160*3),3)); const l=new THREE.Line(g,new THREE.LineBasicMaterial({color:[0x38e1ff,0xe0643a,0x3f8ff0][i],transparent:true,opacity:.9})); l.frustumCulled=false; lab.add(l); labWave.push(l); }
+
+  // ================= MARS SURFACE (0,0,3000) =================
+  const R0=V(0,0,3000), mars=new THREE.Group(); mars.position.copy(R0); scene.add(mars);
+  const tn=noise2(9); const hAt=(x,z)=>(fbm(tn,(x+200)*.03,(z+200)*.03,256,4)-.5)*9*Math.min(1,Math.hypot(x,z)/25+.15);
+  { const g=new THREE.PlaneGeometry(320,320,120,120); g.rotateX(-Math.PI/2); const pa=g.attributes.position, col=new Float32Array(pa.count*3);
+    for(let i=0;i<pa.count;i++){ const x=pa.getX(i), z=pa.getZ(i); pa.setY(i,hAt(x,z)); const v=fbm(tn,(x+400)*.1,(z+400)*.1,256,3); col[i*3]=.42+.35*v; col[i*3+1]=.16+.2*v; col[i*3+2]=.08+.1*v; }
+    g.setAttribute('color',new THREE.BufferAttribute(col,3)); g.computeVertexNormals(); mars.add(new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1})));
+    const pl=new THREE.PointLight(0xffb070,.8,200); pl.position.set(20,40,20); mars.add(pl);
+    const sky=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({color:0x3a1a10,side:THREE.BackSide,transparent:true,opacity:.55,depthWrite:false})); mars.add(sky); }
+  const rover=new THREE.Group(); rover.position.set(0,hAt(0,0)+.2,0); rover.rotation.y=-.6; mars.add(rover);
+  { const w=new THREE.MeshStandardMaterial({color:0xe6e4df,metalness:.3,roughness:.5}), dk=new THREE.MeshStandardMaterial({color:0x2a2d35,metalness:.5,roughness:.5});
+    const bd=new THREE.Mesh(new THREE.BoxGeometry(6.4,1.2,3.8),w); bd.position.y=1.7; rover.add(bd);
+    const cc=new THREE.Mesh(new THREE.BoxGeometry(6.7,1.5,4.1),coatMat()); cc.position.y=1.7; rover.add(cc); coats.push(cc);
+    const mast=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,3.2,10),w); mast.position.set(2.4,3.9,1.2); rover.add(mast);
+    const cam2=new THREE.Mesh(new THREE.BoxGeometry(1.1,.6,.55),w); cam2.position.set(2.4,5.6,1.2); rover.add(cam2);
+    const dish=new THREE.Mesh(new THREE.CylinderGeometry(1.1,.15,.35,28,1,true),new THREE.MeshStandardMaterial({color:0xf2f2f2,side:THREE.DoubleSide})); dish.position.set(-1.3,3.2,1.2); dish.rotation.set(.5,0,.3); rover.add(dish);
+    [-2.6,0,2.6].forEach(x=>[-2.3,2.3].forEach(z=>{ const wh=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,.55,20),dk); wh.rotation.x=Math.PI/2; wh.position.set(x,.75,z); rover.add(wh); })); }
+  const antenna=new THREE.Group(); antenna.position.set(-16,hAt(-16,-10),-10); mars.add(antenna);
+  { const m=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,8,10),metal); m.position.y=4; antenna.add(m);
+    const d=new THREE.Mesh(new THREE.SphereGeometry(3,28,14,0,Math.PI*2,0,Math.PI*.3),new THREE.MeshStandardMaterial({color:0xe6e9ef,side:THREE.DoubleSide,metalness:.3})); d.position.y=8.5; d.rotation.x=-.4; antenna.add(d); }
+  const heli=new THREE.Group(); mars.add(heli);
+  { const b=new THREE.Mesh(new THREE.BoxGeometry(1.2,1,1.2),new THREE.MeshStandardMaterial({color:0xcfd3da,metalness:.3})); heli.add(b);
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,1.6,6),metal); m.position.y=.9; heli.add(m);
+    const bl=new THREE.Mesh(new THREE.BoxGeometry(4,.04,.2),new THREE.MeshStandardMaterial({color:0x222})); bl.position.y=1.6; heli.add(bl); const bl2=bl.clone(); bl2.position.y=1.3; heli.add(bl2); heli.userData={bl,bl2}; }
+  const orbiter=satellite(1.4); mars.add(orbiter);
+  const earthDot=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x4ea8ff,blending:THREE.AdditiveBlending,depthWrite:false})); earthDot.scale.setScalar(6); earthDot.position.set(-160,120,-260); mars.add(earthDot);
+  const linkDots=[]; for(let i=0;i<8;i++){ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x38e1ff,blending:THREE.AdditiveBlending,depthWrite:false})); s.scale.setScalar(1.6); mars.add(s); linkDots.push(s); }
+
+  // ================= cameras =================
+  const W=(g,x,y,z)=>g.position.clone().add(V(x,y,z));
+  const CAMS={
+    space:{ wide:[V(-40,40,140),V(60,0,-60)], earth:[V(-18,16,62),V(8,2,0)], mars:[W(space,0,0,0).add(V(150,30,-80)),MARSP.clone()], final:[V(-60,55,170),V(70,5,-60)] },
+    ground:{ wide:[W(ground,-4,26,58),W(ground,0,6,0)], radar:[W(ground,-6,14,40),W(ground,-4,6,0)], avionics:[W(ground,20,12,16),W(ground,10,8,-1)], both:[W(ground,-2,18,46),W(ground,-3,6,0)] },
+    lab:{ exploded:[W(lab,-28,26,38),W(lab,0,3,0)], slab:[W(lab,-30,24,34),W(lab,0,2,0)], sample:[W(lab,-24,30,28),W(lab,0,2,0)], layers:[W(lab,-40,10,18),W(lab,0,3,0)] },
+    mars:{ surface:[W(mars,14,9,22),W(mars,-2,4,0)] }
+  };
+  let station='space', camFrom=null, camTo=CAMS.space.wide, camT=1, curPos=CAMS.space.wide[0].clone(), curTgt=CAMS.space.wide[1].clone();
+  let fadeEl=document.getElementById('fade'), pendingJump=null;
+  function go(st,key){
+    const tgt=(CAMS[st]&&CAMS[st][key])||CAMS[st][Object.keys(CAMS[st])[0]];
+    if(st!==station){ fadeEl.style.opacity=1; clearTimeout(pendingJump); pendingJump=setTimeout(()=>{ station=st; curPos.copy(tgt[0]).add(V(0,6,14)); curTgt.copy(tgt[1]); camFrom=[curPos.clone(),curTgt.clone()]; camTo=tgt; camT=0; fadeEl.style.opacity=0; },reduce?50:450); }
+    else { camFrom=[curPos.clone(),curTgt.clone()]; camTo=tgt; camT=0; }
+    state.chapter=key; state.station=st;
+  }
+  const state={mode:'ram', echo:1, absorbed:0, trans:0, chapter:'wide', station:'space', coat:0, ramEng:false, emiOn:true,
+    slab:{w:.6,t:.5,layers:1,surface:0,iface:false,R:.8,A:.12,T:.06,metal:false,explode:0}};
+  function setSlab(o){ Object.assign(state.slab,o); updateSlab(); }
+  function updateSlab(){
+    const s=state.slab, nL=s.layers, tot=Math.max(.1,s.t), vis=1.2+tot*1.6, each=vis/nL, gap=state.chapter==='exploded'||state.chapter==='layers'?3.2:0.15;
+    let y=0; backing.visible=s.metal; backing.position.y=-.3;
+    for(let i=0;i<3;i++){
+      const on=i<nL, m=layerMeshes[i]; m.visible=on; ifaces[i].visible=on&&s.iface&&i<nL-1;
+      if(!on) continue;
+      const li=nL-1-i; // inner index from bottom
+      const wl=Math.min(1,s.w*(li+1)/nL); // inner layers carry more graphite (graded)
+      const shade=0.62-0.5*Math.min(1,wl/0.6); m.material.color.setRGB(shade*.95,shade*.98,shade*1.05);
+      m.scale.y=each; m.position.y=y+each/2; ifaces[i].position.y=y+each+gap/2; y+=each+gap;
+    }
+    surf.position.y=y-gap+.01;
+    const pa=surf.geometry.attributes.position, amp=s.surface/100*0.9;
+    for(let i=0;i<pa.count;i++){ const x=surfBase[i*3], yy=surfBase[i*3+1]; pa.setZ(i, amp*(Math.sin(x*1.3)*Math.cos(yy*1.3)+.3*Math.sin(x*3.1+yy*2.3))); }
+    pa.needsUpdate=true; surf.geometry.computeVertexNormals(); surf.material.color.copy(layerMeshes[0].visible?layerMeshes[0].material.color:new THREE.Color(0x3a404c));
+    // flakes proportional to graphite
+    const n=Math.round(Math.min(1,s.w/0.6)*FL), m4=new THREE.Matrix4(), one=V(1,1,1);
+    flakes.count=n; for(let i=0;i<n;i++){ const f=flakeP[i]; m4.compose(V(f.x,f.y*(y-gap),f.z),f.q,one); flakes.setMatrixAt(i,m4); } flakes.instanceMatrix.needsUpdate=true;
+    flakes.visible = state.chapter==='exploded';
+    slab.userData.top=y;
+  }
+  updateSlab();
+  function setResult(o){ Object.assign(state,o); }
+
+  // ================= loop =================
+  function resize(){ const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false); cam.aspect=w/h; cam.fov=w<700?60:45;
+    if(w>=1100) cam.setViewOffset(w,h,-w*0.18,0,w,h); else cam.clearViewOffset(); cam.updateProjectionMatrix(); }
+  addEventListener('resize',resize); resize();
+  let last=performance.now(), emitT=0, flash=0, visible=true;
+  document.addEventListener('visibilitychange',()=>{ visible=!document.hidden; });
+  const tmp=V(0,0,0), dir=V(0,0,0);
+  function spawn(from,to,color,amp,kind){ pulses.push({m:ring(color),from:from.clone(),to:to.clone(),t:0,amp,kind}); }
+  const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  function loop(now){
+    requestAnimationFrame(loop); if(!visible){ last=now; return; }
+    const dt=Math.min(.05,(now-last)/1000); last=now; const t=now/1000, sp=reduce?.3:1;
+    // camera
+    if(camFrom&&camT<1){ camT=Math.min(1,camT+dt/(reduce?.01:1.8)); const e=ease(camT); curPos.lerpVectors(camFrom[0],camTo[0],e); curTgt.lerpVectors(camFrom[1],camTo[1],e); }
+    const drift = reduce?0:Math.sin(t*.15)*2.2;
+    cam.position.set(curPos.x+drift,curPos.y+Math.sin(t*.2)*0.8,curPos.z); cam.lookAt(curTgt);
+    // space
+    earth.rotation.y+=dt*.03*sp; clouds.rotation.y+=dt*.045*sp; marsS.rotation.y+=dt*.025*sp;
+    sats.forEach((s,i)=>{ const a=t*(.25+i*.07)*sp+i*2.1, R=28+i*5; s.position.set(Math.cos(a)*R, Math.sin(a*.7+i)*8, Math.sin(a)*R); s.lookAt(0,0,0); });
+    const cp=((t*.025*sp)%1); craft.position.copy(route.getPoint(cp)); const ahead=route.getPoint(Math.min(1,cp+.01)); craft.lookAt(ahead); craft.rotateY(-Math.PI/2);
+    commDots.forEach((d,i)=>{ const k=((t*.35+i/commDots.length)%1); d.position.lerpVectors(V(12,14,6),craft.position,k); d.material.opacity=Math.sin(k*Math.PI); });
+    const cg=state.coat*(.55+.45*Math.sin(t*2)); coats.forEach(c=>c.material.opacity=cg*.35);
+    // ground
+    drone.position.set(D0.x+Math.sin(t*.4)*1.2*sp, D0.y+Math.sin(t*1.3)*.35*sp, D0.z+Math.cos(t*.3)*sp);
+    drone.rotation.y=-.4+Math.sin(t*.25)*.12; rotors.forEach((ro,i)=>ro.rotation.y+=dt*(i%2?-1:1)*38*sp);
+    const a=t*.12*sp; jet.position.set(Math.cos(a)*60,26,Math.sin(a)*60-10); jet.rotation.y=-a-Math.PI/2; jet.rotation.x=.2;
+    const droneW=drone.getWorldPosition(V(0,0,0)); rhead.lookAt(droneW); const feedW=feedTip.getWorldPosition(V(0,0,0));
+    if(state.station==='ground'){ emitT+=dt*sp; if(emitT>1.2){ emitT=0; spawn(feedW,droneW,0xffc24a,1,'out'); } }
+    for(let i=pulses.length-1;i>=0;i--){ const p=pulses[i]; const len=p.from.distanceTo(p.to); p.t+=dt*sp*24/len;
+      const pos=tmp.copy(p.from).lerp(p.to,Math.min(p.t,1)); p.m.position.copy(pos); dir.subVectors(p.to,p.from).normalize(); p.m.lookAt(pos.clone().add(dir));
+      p.m.scale.setScalar(p.kind==='out'?.6+p.t*2.6:(.8+p.t*2.2)*Math.max(.25,p.amp));
+      p.m.material.opacity=(p.kind==='out'?.85:Math.min(1,p.amp*1.2+.05))*(1-Math.max(0,p.t-.85)/.15);
+      if(p.t>=1){ if(p.kind==='out'){ flash=1; const amp=Math.sqrt(Math.max(0,state.echo)); if(amp>.02) spawn(droneW,feedW,0xff6a3d,amp,'echo'); } scene.remove(p.m); p.m.geometry.dispose(); p.m.material.dispose(); pulses.splice(i,1); } }
+    flash=Math.max(0,flash-dt*1.6);
+    const gl=state.absorbed*flash; hitGlow.material.opacity=.55*gl; skin.emissiveIntensity=.9*gl; shell.emissiveIntensity=.9*gl;
+    const emiView=state.chapter==='avionics'; avi.visible=emiView; body.material=emiView?shell:skin;
+    chips.forEach(c=>c.material.emissiveIntensity=emiView?Math.min(1,Math.sqrt(state.trans)*2.2)*(.4+.6*flash):0);
+    // lab
+    slab.rotation.y=-.5+Math.sin(t*.12)*.25*sp;
+    const top=(slab.userData.top||2);
+    const s=state.slab, amps=[1,Math.sqrt(Math.max(0,s.R)),Math.sqrt(Math.max(0,s.T))];
+    labWave.forEach((l,k)=>{ const arr=l.geometry.attributes.position.array; for(let i=0;i<160;i++){ const u=i/159; let x,y,z;
+        if(k===0){ x=-30+u*20; y=top+14-u*14*.0; } else if(k===1){ x=-10-u*20; y=top+14; } else { x=-10+u*24; y=-6; }
+        const ph=k===1?(x*.9+t*6):(x*.9-t*6); const A=(k===2&&s.metal)?0:1.4*amps[k];
+        if(k===0){ y=top+10*(1-u)+2; } if(k===1){ y=top+2+10*u; }
+        arr[i*3]=x; arr[i*3+1]=y+A*Math.sin(ph); arr[i*3+2]=0; }
+      l.geometry.attributes.position.needsUpdate=true; l.visible = state.station==='lab' && !(k===2&&(s.metal||s.T<.002)); l.material.opacity=k===0?.9:Math.min(.95,.2+amps[k]); });
+    // mars
+    heli.position.set(Math.cos(t*.3)*10,12+Math.sin(t*.8),Math.sin(t*.3)*10-4); heli.userData.bl.rotation.y+=dt*30; heli.userData.bl2.rotation.y-=dt*30;
+    orbiter.position.set(Math.cos(t*.08)*60,70,Math.sin(t*.08)*60-40); orbiter.lookAt(mars.position);
+    linkDots.forEach((d,i)=>{ const k=((t*.3+i/linkDots.length)%1); const from=antenna.position.clone().add(V(0,9,0)); d.position.lerpVectors(from,earthDot.position,k); d.material.opacity=Math.sin(k*Math.PI)*.9; });
+    renderer.render(scene,cam);
+  }
+  requestAnimationFrame(loop);
+  return {go,setResult,setSlab,updateSlab,state};
+})();
+// ===== THREE END =====
+
+(function(){
+'use strict';
+const DATA=window.__BHAVIRA_DATA__, $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C={em:'#38e1ff',refl:'#e0643a',abs:'#1fb584',trans:'#3f8ff0',ink:'#e9eef7',muted:'#a6b1c6',faint:'#76819a',edge:'rgba(170,195,235,.16)',silver:'#c9d1dc',measured:'#3ccf8e',model:'#ffb347',hypo:'#9aa3b2',s1:'#3987e5',s3:'#199e70',heat0:'#14223a',heat1:'#9fd0ff',metal:'#c9d1dc',pcb:'#0f6b3a'};
+const D=M.draws(DATA.post,160,'both',42), DM=D.slice(0,40);
+const pct=v=>Math.round(v*100)+'%', fmt=(v,d=1)=>(Math.abs(v)<1e-9?0:v).toFixed(d).replace('-','−');
+function rgba(h,a){ h=h.replace('#',''); const n=parseInt(h,16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+function mixHex(a,b,t){ const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16); const c=[16,8,0].map(s=>Math.round(((pa>>s)&255)+(((pb>>s)&255)-((pa>>s)&255))*t)); return `rgb(${c.join(',')})`; }
+function nearest(f){ let i=0,b=1e9; DATA.f.forEach((v,k)=>{ if(Math.abs(v-f)<b){b=Math.abs(v-f); i=k;} }); return i; }
+const meas10=(()=>{ const i=nearest(10); return {R:DATA.R.mean[i],A:DATA.A.mean[i],T:DATA.T.mean[i]}; })();
+const measAvg={R:DATA.summary.reduce((a,s)=>a+s.R,0)/3,A:DATA.summary.reduce((a,s)=>a+s.A,0)/3,T:DATA.summary.reduce((a,s)=>a+s.T,0)/3,SE:DATA.summary.reduce((a,s)=>a+s.SE,0)/3};
+
+/* ---------- model helpers ---------- */
+function graded(w,tmm,N,dr,f){ const L=[]; for(let k=0;k<N;k++){ const wk=w*(k+1)/N; L.push({eps:M.epsFor(Math.min(wk,0.6),dr,f), d:tmm*1e-3/N}); } return L; }
+function evalDesign(w,tmm,N,f,target,draws){
+  const Rs=[],As=[],Ts=[],Ss=[];
+  for(const dr of draws){
+    if(target==='ram'){ const rl=M.rlDb(f,graded(w,tmm,N,dr,f)); const R=Math.pow(10,rl/10); Rs.push(R); As.push(1-R); Ts.push(0); Ss.push(rl); }
+    else { const s=M.stack(f,graded(w,tmm,N,dr,f)); Rs.push(s.R); As.push(Math.max(0,s.A)); Ts.push(s.T); Ss.push(s.SE); }
+  }
+  const q=(a,p)=>M.quant(a,p);
+  return {R:q(Rs,.5),A:q(As,.5),T:q(Ts,.5),S:q(Ss,.5),Rr:[q(Rs,.1),q(Rs,.9)],Ar:[q(As,.1),q(As,.9)],Tr:[q(Ts,.1),q(Ts,.9)],Sr:[q(Ss,.1),q(Ss,.9)]};
+}
+function rlCurve(layersFn,F){ const per=F.map(()=>[]); D.forEach(dr=>F.forEach((f,i)=>per[i].push(M.rlDb(f,layersFn(dr,f))))); return {med:per.map(a=>M.quant(a,.5)),lo:per.map(a=>M.quant(a,.1)),hi:per.map(a=>M.quant(a,.9))}; }
+const candTwo=(dr,f)=>[{eps:M.epsFor(.25,dr,f),d:2.5e-3},{eps:M.epsFor(.55,dr,f),d:1.25e-3}];
+const candOne=(dr,f)=>[{eps:M.epsFor(.35,dr,f),d:2e-3}];
+const refMeas=(dr,f)=>[{eps:M.epsFor(.6,dr,f),d:.5e-3}];
+const engR = (()=>{ const a=D.map(dr=>Math.pow(10,M.rlDb(10,candTwo(dr,10))/10)); return {R:M.quant(a,.5),lo:M.quant(a,.1),hi:M.quant(a,.9)}; })();
+
+/* ---------- canvas helpers ---------- */
+function setup(cv){ const dpr=Math.min(devicePixelRatio||1,2), w=cv.clientWidth, h=cv.clientHeight; if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,w,h); x.font='12px "IBM Plex Sans", system-ui, sans-serif'; x.textBaseline='middle'; return {x,w,h}; }
+function hover(cv,tip,fn){ const box=cv.parentElement; cv.addEventListener('pointermove',e=>{ const r=cv.getBoundingClientRect(), res=fn(e.clientX-r.left,e.clientY-r.top); if(!res){tip.hidden=true;return;} tip.innerHTML=res; tip.hidden=false; const br=box.getBoundingClientRect(); let lx=e.clientX-br.left+14; if(lx+tip.offsetWidth>br.width) lx=e.clientX-br.left-tip.offsetWidth-14; tip.style.left=Math.max(4,lx)+'px'; tip.style.top=(e.clientY-br.top-12)+'px'; }); cv.addEventListener('pointerleave',()=>tip.hidden=true); }
+function onVisible(el,cb){ let on=false; new IntersectionObserver(es=>{ on=es[0].isIntersecting; cb(on); }).observe(el); return ()=>on; }
+
+/* ---------- 2D wave scenes ---------- */
+function wave(x,x0,x1,y,amp,k,phase,color,dir,width){ x.beginPath(); for(let px=x0;px<=x1;px+=2){ const yy=y+amp*Math.sin(k*px*dir-phase); px===x0?x.moveTo(px,yy):x.lineTo(px,yy); } x.strokeStyle=color; x.lineWidth=width||2.2; x.stroke(); }
+function label(x,t,px,py,color,align){ x.fillStyle=color; x.textAlign=align||'left'; x.font='600 12.5px "IBM Plex Sans", system-ui, sans-serif'; x.fillText(t,px,py); x.font='12px "IBM Plex Sans", system-ui, sans-serif'; }
+function radarIcon(x,cx,cy){ x.strokeStyle=C.silver; x.lineWidth=2; x.beginPath(); x.arc(cx+10,cy,16,Math.PI*.6,Math.PI*1.4); x.stroke(); x.beginPath(); x.moveTo(cx+10,cy); x.lineTo(cx+22,cy); x.stroke(); x.fillStyle='#ffc24a'; x.beginPath(); x.arc(cx+22,cy,3,0,7); x.fill(); x.fillStyle=C.silver; x.fillRect(cx+4,cy+14,6,18); }
+function chip(x,cx,cy,glow){ x.fillStyle=C.pcb; x.fillRect(cx-34,cy-24,68,48); x.fillStyle='#14161b'; x.fillRect(cx-14,cy-12,28,24); if(glow>0.01){ const g=x.createRadialGradient(cx,cy,2,cx,cy,40); g.addColorStop(0,`rgba(255,70,70,${Math.min(.9,glow)})`); g.addColorStop(1,'rgba(255,70,70,0)'); x.fillStyle=g; x.fillRect(cx-44,cy-44,88,88);} x.strokeStyle='#3ccf8e'; x.lineWidth=1; for(let i=-2;i<=2;i++){ x.beginPath(); x.moveTo(cx-34,cy+i*8); x.lineTo(cx-20,cy+i*8); x.stroke(); } }
+function drawScene(cv,cfg,t){
+  const {x,w,h}=setup(cv), cy=h*.56, k=0.075, ph=t*5, A=Math.min(26,h*.12);
+  const sx=w*.56, sw=cfg.slab===false?0:Math.max(12,w*.05);
+  const srcX=w*.05;
+  if(cfg.kind==='ram') radarIcon(x,srcX-6,cy); else { x.fillStyle=C.em; x.beginPath(); x.arc(srcX+8,cy,6,0,7); x.fill(); }
+  // incoming
+  wave(x,srcX+28,sx,cy,A,k,ph,C.em,1);
+  label(x,'Incoming',srcX+30,cy-A-16,C.em);
+  // slab
+  if(cfg.slab!==false){ const gl=Math.max(0,Math.min(1,cfg.A)); x.fillStyle='#2a2f38'; x.fillRect(sx,cy-h*.36,sw,h*.72); x.fillStyle=rgba(C.abs,.15+.75*gl*(.6+.4*Math.sin(t*4))); x.fillRect(sx,cy-h*.36,sw,h*.72);
+    label(x,`Absorbed ${pct(cfg.A)}`,sx+sw/2,cy+h*.36+14>h-8?h-8:cy+h*.36+10,C.abs,'center'); }
+  if(cfg.metal){ x.fillStyle=C.metal; x.fillRect(sx+sw,cy-h*.36,5,h*.72); label(x,cfg.slab===false?'Metal surface':'Metal backing',sx+sw+10,cy-h*.36+8,C.silver); }
+  // reflected
+  const rA=A*Math.sqrt(Math.max(0,cfg.R)); if(rA>.4){ wave(x,srcX+28,sx,cy-h*.2,rA,k,-ph,C.refl,1); }
+  label(x,`${cfg.kind==='ram'?'Echo':'Reflected'} ${pct(cfg.R)}`,sx-8,cy-h*.2-A-6<12?14:cy-h*.2-A-6,C.refl,'right');
+  // transmitted
+  if(!cfg.metal){ const tA=A*Math.sqrt(Math.max(0,cfg.T)), end=cfg.kind==='emi'?w*.8-36:w*.96; if(tA>.3) wave(x,sx+sw,end,cy,tA,k,ph,C.trans,1);
+    label(x,`${cfg.kind==='emi'?'Reaches electronics':'Transmitted'} ${(cfg.T*100).toFixed(cfg.T<.1?1:0)}%`,Math.min(w-8,sx+sw+10),cy+A+18,C.trans,'left'); }
+  if(cfg.kind==='emi') chip(x,w*.86,cy,Math.sqrt(Math.max(0,cfg.T))*1.1*(.6+.4*Math.sin(t*9)));
+}
+function drawLayers(cv,t){
+  const {x,w,h}=setup(cv), x0=w*.42, bands=[{c:'#3a404c',n:'Layer 1: matching'},{c:'#2a2f38',n:'Layer 2: absorbing'},{c:'#38e1ff',n:'Conductive interface',thin:true},{c:'#c9d1dc',n:'Substrate'}];
+  let bx=x0; const ws=[w*.14,w*.16,4,w*.06];
+  bands.forEach((b,i)=>{ x.fillStyle=b.c; x.globalAlpha=b.thin?.9:1; x.fillRect(bx,12,ws[i],h-40); x.globalAlpha=1; x.save(); x.translate(bx+ws[i]/2,h-14); x.fillStyle=C.muted; x.textAlign='center'; x.font='11.5px "IBM Plex Sans", system-ui'; if(!b.thin) x.fillText(b.n,0,0); x.restore(); bx+=ws[i]; });
+  label(x,'Radar',10,h*.2,C.em); wave(x,50,x0,h*.3,14,.08,t*5,C.em,1);
+  // zig-zag internal bounces
+  const pts=[[x0,h*.3]], L=[x0+ws[0]+ws[1],x0]; let cx=x0, cyy=h*.3, amp=1, i=0, alpha=1;
+  x.lineWidth=2.2;
+  for(let b=0;b<5;b++){ const tx=b%2===0?x0+ws[0]+ws[1]:x0+ (b===1?ws[0]*.0:0); const ny=cyy+h*.11; const g=x.createLinearGradient(cx,cyy,tx,ny); g.addColorStop(0,rgba(C.em,alpha)); alpha*=.62; g.addColorStop(1,rgba(C.abs,alpha)); x.strokeStyle=g; x.beginPath(); x.moveTo(cx,cyy); x.lineTo(tx,ny); x.stroke(); cx=tx; cyy=ny; if(cyy>h-60) break; }
+  wave(x,50,x0,h*.16,4,.08,-t*5,C.refl,1,1.6); label(x,'Small reflection',54,h*.08,C.refl);
+  label(x,'Energy lost on each pass',x0+ws[0]+ws[1]+20,h*.55,C.abs);
+}
+function animate(cv,draw){ const vis=onVisible(cv,()=>{}); let t0=performance.now(); (function f(now){ requestAnimationFrame(f); if(!vis()) return; draw((now-t0)/1000*(reduce?.3:1)); })(t0); }
+
+/* ---------- section: energy / emi / ram / layers ---------- */
+animate($('#wvEnergy'),t=>drawScene($('#wvEnergy'),{kind:'split',R:meas10.R,A:meas10.A,T:meas10.T},t));
+let chainI=0; setInterval(()=>{ const s=$$('#energyChain span'); s.forEach((e,i)=>{ e.style.borderColor=i===chainI?C.em:''; e.style.color=i===chainI?C.em:''; }); chainI=(chainI+1)%s.length; },1400);
+let emiOn=true;
+function emiCfg(){ return emiOn?{kind:'emi',R:meas10.R,A:meas10.A,T:meas10.T}:{kind:'emi',slab:false,R:0,A:0,T:1}; }
+function emiText(){ $('#emiLine').innerHTML = emiOn ? `With our 60:40, 0.5 mm shield about <b>${(meas10.T*100).toFixed(1)}%</b> of the power reaches the electronics at 10 GHz, a shielding of about <b>${fmt(-10*Math.log10(meas10.T))} dB</b>. <span class="tag measured">Measured</span>` : `Without a shield, <b>100%</b> of the incoming energy reaches the electronics.`; }
+animate($('#wvEmi'),t=>drawScene($('#wvEmi'),emiCfg(),t));
+$('#emiOn').onclick=()=>{ emiOn=true; $('#emiOn').setAttribute('aria-pressed','true'); $('#emiOff').setAttribute('aria-pressed','false'); emiText(); sync3D(); };
+$('#emiOff').onclick=()=>{ emiOn=false; $('#emiOff').setAttribute('aria-pressed','true'); $('#emiOn').setAttribute('aria-pressed','false'); emiText(); sync3D(); };
+emiText();
+let ramEng=false;
+function ramCfg(){ return ramEng?{kind:'ram',metal:true,R:engR.R,A:1-engR.R,T:0}:{kind:'ram',metal:true,slab:false,R:1,A:0,T:0}; }
+function ramText(){ $('#ramLine').innerHTML = ramEng ? `The engineered two-layer concept (25% graphite, 2.5 mm over 55%, 1.25 mm) is predicted to return about <b>${pct(engR.R)}</b> of the radar energy at 10 GHz, likely between ${pct(engR.lo)} and ${pct(engR.hi)}. <span class="tag model">Modelled estimate</span>` : `A conventional metal surface returns nearly <b>100%</b> of the radar energy as a strong echo.`; }
+animate($('#wvRam'),t=>drawScene($('#wvRam'),ramCfg(),t));
+$('#ramMetal').onclick=()=>{ ramEng=false; $('#ramMetal').setAttribute('aria-pressed','true'); $('#ramEng').setAttribute('aria-pressed','false'); ramText(); sync3D(); };
+$('#ramEng').onclick=()=>{ ramEng=true; $('#ramEng').setAttribute('aria-pressed','true'); $('#ramMetal').setAttribute('aria-pressed','false'); ramText(); sync3D(); };
+ramText();
+animate($('#wvLayers'),t=>drawLayers($('#wvLayers'),t));
+
+/* ---------- tuner ---------- */
+const TS={w:.6,t:.5,N:1,f:10,surf:0,iface:false,target:'emi'};
+let TR=null;
+function tune(){
+  $('#swo').textContent=Math.round(TS.w*100)+'%'; $('#sto').textContent=TS.t.toFixed(2)+' mm'; $('#slo').textContent=TS.N===1?'1 layer':TS.N+' layers'; $('#sfo').textContent=TS.f.toFixed(1)+' GHz'; $('#sso').textContent=TS.surf===0?'Smooth':TS.surf<50?'Light texture':'Structured';
+  const tags=[]; let res=null, measured=false;
+  const inBand=TS.f>=8.2&&TS.f<=12.4;
+  if(TS.w>0.6+1e-9){ tags.push('<span class="tag future">Untested · above 60% graphite is outside our data and model</span>'); }
+  else if(TS.target==='emi'&&Math.abs(TS.w-.6)<.006&&Math.abs(TS.t-.5)<.026&&TS.N===1&&inBand&&TS.surf===0&&!TS.iface){
+    measured=true; const i=nearest(TS.f); res={R:DATA.R.mean[i],A:Math.max(0,DATA.A.mean[i]),T:DATA.T.mean[i],S:DATA.SE.mean[i],Rr:[DATA.R.lo[i],DATA.R.hi[i]],Ar:[DATA.A.lo[i],DATA.A.hi[i]],Tr:[DATA.T.lo[i],DATA.T.hi[i]],Sr:[DATA.SE.lo[i],DATA.SE.hi[i]]};
+    tags.push('<span class="tag measured">Measured · 3 lab samples</span>');
+  } else {
+    res=evalDesign(TS.w,TS.t,TS.N,TS.f,TS.target,D); tags.push('<span class="tag model">Modelled estimate</span>');
+    if(!inBand) tags.push('<span class="tag future">Extrapolated outside 8.2–12.4 GHz</span>');
+  }
+  if(TS.surf>0||TS.iface) tags.push('<span class="tag hypo">Engineering hypothesis · surface and interface are shown, not calculated</span>');
+  $('#tuneTags').innerHTML=tags.join('');
+  const set=(id,v,r)=>{ $('#'+id).textContent=v==null?'–':(v*100).toFixed(v<.1&&v>0?1:0)+'%'; $('#'+id+'s').textContent=r?`range ${(r[0]*100).toFixed(0)}–${(r[1]*100).toFixed(0)}%`:''; };
+  if(res){ set('oR',res.R,res.Rr); set('oA',res.A,res.Ar); set('oT',TS.target==='ram'?0:res.T,TS.target==='ram'?null:res.Tr);
+    const tot=res.R+res.A+(TS.target==='ram'?0:res.T)||1; $('#mR').style.width=(res.R/tot*100)+'%'; $('#mA').style.width=(res.A/tot*100)+'%'; $('#mT').style.width=((TS.target==='ram'?0:res.T)/tot*100)+'%';
+    $('#tuneLine').innerHTML = TS.target==='emi'
+      ? `This ${TS.N>1?TS.N+'-layer ':''}sheet would stop about <b>${(100*(1-res.T)).toFixed(res.T<.01?1:0)}%</b> of the incoming power at ${TS.f.toFixed(1)} GHz, a shielding of <b>${fmt(res.S)} dB</b>${measured?'':` (range ${fmt(res.Sr[0])} to ${fmt(res.Sr[1])} dB)`}.`
+      : `On a metal surface this design would return about <b>${pct(res.R)}</b> of the radar energy at ${TS.f.toFixed(1)} GHz (reflection loss <b>${fmt(res.S)} dB</b>) and absorb about <b>${pct(res.A)}</b>.`;
+  } else { ['oR','oA','oT'].forEach(id=>{ $('#'+id).textContent='–'; $('#'+id+'s').textContent='not calculated'; }); $('#mR').style.width='0'; $('#mA').style.width='0'; $('#mT').style.width='0'; $('#tuneLine').innerHTML='No estimate. We have no data or model above 60% graphite, so this region is marked untested.'; }
+  $('#tuneNote').textContent = TS.N>1 ? `Graded stack: total thickness is shared equally and graphite rises toward the inner layer (${Array.from({length:TS.N},(_,k)=>Math.round(TS.w*(k+1)/TS.N*100)+'%').join(' → ')}, outer to inner).` : (TS.target==='ram'?'Layer sits on a metal plate, so nothing is transmitted. Absorbed = 1 − reflected.':'Free-standing sheet in free space at normal incidence.');
+  TR=res; renderEng();
+  if(World) World.setSlab({w:Math.min(TS.w,1),t:TS.t,layers:TS.N,surface:TS.surf,iface:TS.iface,metal:TS.target==='ram',R:res?res.R:.8,A:res?res.A:0,T:res&&TS.target!=='ram'?res.T:0});
+}
+animate($('#wvTune'),t=>drawScene($('#wvTune'),TR?{kind:TS.target==='ram'?'ram':'split',metal:TS.target==='ram',R:TR.R,A:TR.A,T:TS.target==='ram'?0:TR.T}:{kind:'split',R:0,A:0,T:0,slab:true},t));
+let tq=0; function tuneSoon(){ cancelAnimationFrame(tq); tq=requestAnimationFrame(tune); }
+[['sw',v=>TS.w=v/100],['st',v=>TS.t=v],['sl',v=>TS.N=v],['sf',v=>TS.f=v],['ss',v=>TS.surf=v]].forEach(([id,fn])=>$('#'+id).addEventListener('input',e=>{ fn(+e.target.value); tuneSoon(); }));
+const press=(a,b)=>{ $(a).setAttribute('aria-pressed','true'); $(b).setAttribute('aria-pressed','false'); };
+$('#tgEmi').onclick=()=>{ TS.target='emi'; press('#tgEmi','#tgRam'); tune(); };
+$('#tgRam').onclick=()=>{ TS.target='ram'; press('#tgRam','#tgEmi'); tune(); };
+$('#ifOn').onclick=()=>{ TS.iface=true; press('#ifOn','#ifOff'); tune(); };
+$('#ifOff').onclick=()=>{ TS.iface=false; press('#ifOff','#ifOn'); tune(); };
+$('#resetMeasured').onclick=()=>{ Object.assign(TS,{w:.6,t:.5,N:1,f:10,surf:0,iface:false,target:'emi'}); $('#sw').value=60; $('#st').value=.5; $('#sl').value=1; $('#sf').value=10; $('#ss').value=0; press('#tgEmi','#tgRam'); press('#ifOff','#ifOn'); tune(); };
+
+/* ---------- engineer table ---------- */
+function renderEng(){
+  const w=Math.min(TS.w,.6), f=TS.f, inner=w; const eps=D.map(dr=>M.epsFor(inner,dr,f)), er=eps.map(e=>e[0]), ei=eps.map(e=>-e[1]), td=eps.map(e=>-e[1]/e[0]);
+  const sig=D.map(dr=>{ const e=M.epsFor(inner,dr,f); return -e[1]*2*Math.PI*f*1e9*8.854e-12; }), rs=sig.map(s=>s>1e-9?1/(s*TS.t*1e-3):Infinity);
+  const q=(a,p)=>M.quant(a.filter(Number.isFinite).length?a.filter(Number.isFinite):[NaN],p);
+  const rho=M.density(Math.min(TS.w,1)), mass=rho*TS.t, over=TS.w>.6+1e-9;
+  const measuredMat = Math.abs(TS.w-.6)<.006;
+  const tagM='<span class="tag measured">Measured</span>', tagMo='<span class="tag model">Modelled</span>', tagIn='<span class="tag hypo">Input</span>', tagC='<span class="tag model">Calculated</span>', tagT='<span class="tag future">Target</span>', tagU='<span class="tag future">Untested</span>';
+  const r=TR, isMeas=$('#tuneTags').innerHTML.includes('measured');
+  const rt=v=>r?(v*100).toFixed(v<.1?1:0)+'%':'–';
+  const rows=[
+    ['Frequency',TS.f.toFixed(1)+' GHz',tagIn,''],
+    ['Graphite ratio',Math.round(TS.w*100)+' wt%',tagIn,''],
+    ['Thickness',TS.t.toFixed(2)+' mm',tagIn,''],
+    ['Layer count',TS.N,tagIn,''],
+    ['Reflection',rt(r&&r.R),over?tagU:isMeas?tagM:tagMo,TS.target==='ram'?'≤ 10% (−10 dB)':''],
+    ['Absorption',rt(r&&r.A),over?tagU:isMeas?tagM:tagMo,TS.target==='ram'?'≥ 90%':''],
+    ['Transmission',TS.target==='ram'?'0% (metal)':rt(r&&r.T),over?tagU:isMeas?tagM:tagMo,TS.target==='emi'?'≤ 0.1%':''],
+    [TS.target==='ram'?'Reflection loss':'Shielding effectiveness',r?fmt(r.S)+' dB':'–',over?tagU:isMeas?tagM:tagMo,TS.target==='ram'?'≤ −10 dB over ≥ 1 GHz':'≥ 30 dB'],
+    ['Permittivity ε′ (inner layer)',over?'–':`${fmt(q(er,.5),0)} <span class="note">(${fmt(q(er,.1),0)}–${fmt(q(er,.9),0)})</span>`,over?tagU:measuredMat?'<span class="tag model">Fitted to measurement</span>':tagMo,''],
+    ['Loss tangent tan δ',over?'–':`${fmt(q(td,.5),2)} <span class="note">(${fmt(q(td,.1),2)}–${fmt(q(td,.9),2)})</span>`,over?tagU:measuredMat?'<span class="tag model">Fitted to measurement</span>':tagMo,''],
+    ['Surface resistance R<sub>s</sub>',over?'–':(()=>{ const m=q(rs,.5); return Number.isFinite(m)?`${fmt(m,0)} Ω/sq <span class="note">(${fmt(q(rs,.1),0)}–${fmt(q(rs,.9),0)})</span>`:'non-conducting'; })(),over?tagU:tagMo,''],
+    ['Density',rho.toFixed(2)+' g/cm³',tagC,''],
+    ['Areal mass',mass.toFixed(2)+' kg/m²',tagC,'≤ 2 kg/m²']
+  ];
+  $('#engTbl').innerHTML='<thead><tr><th>Quantity</th><th>Value</th><th>Status</th><th>Proposed target</th></tr></thead><tbody>'+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+'</tbody>';
+  $('#engSummary').textContent=`Current design from the tuning tool: ${Math.round(TS.w*100)}% graphite, ${TS.t.toFixed(2)} mm, ${TS.N} layer${TS.N>1?'s':''}, ${TS.f.toFixed(1)} GHz, used as ${TS.target==='ram'?'a radar absorber on metal':'a free-standing EMI shield'}. Ranges are the 10–90% spread across 160 model draws.`;
+}
+
+/* ---------- measured chart ---------- */
+let measSt=null;
+function drawMeas(){ const cv=$('#cvMeas'), c=setup(cv), x=c.x, pad={l:44,r:92,t:10,b:24};
+  const X=f=>pad.l+(f-8.2)/4.2*(c.w-pad.l-pad.r), Y=v=>pad.t+(1-(v+.1)/1.1)*(c.h-pad.t-pad.b);
+  x.strokeStyle=C.edge; x.fillStyle=C.muted; x.lineWidth=1; x.textAlign='right';
+  [0,.25,.5,.75,1].forEach(v=>{ x.beginPath(); x.moveTo(pad.l,Y(v)); x.lineTo(c.w-pad.r,Y(v)); x.stroke(); x.fillText(Math.round(v*100)+'%',pad.l-6,Y(v)); });
+  x.textAlign='center'; [9,10,11,12].forEach(f=>x.fillText(f+' GHz',X(f),c.h-pad.b+14));
+  const F=DATA.f;
+  [['R',C.refl,'Reflected'],['A',C.abs,'Absorbed'],['T',C.trans,'Transmitted']].forEach(([k,col])=>{
+    x.beginPath(); F.forEach((f,i)=>i?x.lineTo(X(f),Y(DATA[k].hi[i])):x.moveTo(X(f),Y(DATA[k].hi[i]))); for(let i=F.length-1;i>=0;i--) x.lineTo(X(F[i]),Y(DATA[k].lo[i])); x.closePath(); x.fillStyle=rgba(col,.2); x.fill();
+    x.beginPath(); F.forEach((f,i)=>i?x.lineTo(X(f),Y(DATA[k].mean[i])):x.moveTo(X(f),Y(DATA[k].mean[i]))); x.strokeStyle=col; x.lineWidth=2; x.stroke(); });
+  const ends=[['Reflected','R',C.refl],['Absorbed','A',C.abs],['Transmitted','T',C.trans]].map(([l,k,col])=>({l,col,y:Y(DATA[k].mean.slice(-12).reduce((a,b)=>a+b,0)/12)})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<ends.length;i++) if(ends[i].y-ends[i-1].y<16) ends[i].y=ends[i-1].y+16;
+  ends.forEach(e=>{ x.fillStyle=e.col; x.beginPath(); x.arc(c.w-pad.r+8,e.y,3.5,0,7); x.fill(); x.fillStyle=C.ink; x.textAlign='left'; x.fillText(e.l,c.w-pad.r+15,e.y); });
+  measSt={X,pad,w:c.w}; }
+hover($('#cvMeas'),$('#tipMeas'),mx=>{ if(!measSt) return null; const {pad,w}=measSt; if(mx<pad.l||mx>w-pad.r) return null; const f=8.2+(mx-pad.l)/(w-pad.l-pad.r)*4.2, i=nearest(f);
+  return `<b>${DATA.f[i].toFixed(2)} GHz</b><br>Reflected ${pct(DATA.R.mean[i])}<br>Absorbed ${pct(DATA.A.mean[i])}<br>Transmitted ${(DATA.T.mean[i]*100).toFixed(1)}%<br>Shielding ${fmt(DATA.SE.mean[i])} dB`; });
+$('#measTbl').innerHTML='<thead><tr><th>Sample</th><th>Reflected</th><th>Absorbed</th><th>Transmitted</th><th>Shielding</th></tr></thead><tbody>'+DATA.summary.map(s=>`<tr><td>#${s.n}</td><td>~${pct(s.R)}</td><td>~${pct(s.A)}</td><td>~${(s.T*100).toFixed(1)}%</td><td>~${s.SE.toFixed(1)} dB</td></tr>`).join('')+'</tbody>';
+
+/* ---------- design map ---------- */
+const MW=Array.from({length:21},(_,i)=>i*.05), MT=Array.from({length:20},(_,i)=>.25+i*.25);
+let mapGrid=null, mapMetric='A', mapSt=null;
+function computeMap(){ mapGrid=MT.map(()=>MW.map(()=>null)); let ci=0;
+  (function step(){ const w=MW[ci]; MT.forEach((t,ri)=>{ if(w>.6+1e-9){ mapGrid[ri][ci]={u:true}; return; } const e=evalDesign(Math.max(w,.001),t,1,10,'emi',DM); mapGrid[ri][ci]=e; }); ci++; drawMap(); if(ci<MW.length) setTimeout(step,0); })(); }
+function mval(g){ return mapMetric==='SE'?g.S:g[mapMetric]; }
+function drawMap(){ const cv=$('#cvMap'), c=setup(cv), x=c.x, pad={l:56,r:10,t:8,b:26}; if(!mapGrid) return;
+  const cw=(c.w-pad.l-pad.r)/MW.length, ch=(c.h-pad.t-pad.b)/MT.length, vmax=mapMetric==='SE'?Math.max(10,...mapGrid.flat().filter(g=>g&&!g.u).map(g=>g.S)):1;
+  mapGrid.forEach((row,ri)=>row.forEach((g,ci)=>{ const px=pad.l+ci*cw, py=c.h-pad.b-(ri+1)*ch;
+    if(!g){ x.fillStyle='rgba(255,255,255,.04)'; x.fillRect(px+1,py+1,cw-2,ch-2); return; }
+    if(g.u){ x.fillStyle='rgba(154,163,178,.1)'; x.fillRect(px+1,py+1,cw-2,ch-2); x.strokeStyle='rgba(154,163,178,.35)'; x.lineWidth=1; x.beginPath(); x.moveTo(px+2,py+ch-2); x.lineTo(px+cw-2,py+2); x.stroke(); return; }
+    x.fillStyle=mixHex(C.heat0,C.heat1,Math.max(0,Math.min(1,mval(g)/vmax))); x.fillRect(px+1,py+1,cw-2,ch-2); }));
+  // measured cell
+  const mci=12, mri=1; x.strokeStyle=C.measured; x.lineWidth=2.5; x.strokeRect(pad.l+mci*cw+1,c.h-pad.b-(mri+1)*ch+1,cw-2,ch-2);
+  x.fillStyle=C.measured; x.textAlign='left'; x.font='600 12px "IBM Plex Sans", system-ui'; x.fillText('Measured',pad.l+mci*cw+cw+4,c.h-pad.b-(mri+.5)*ch);
+  x.fillStyle=C.hypo; x.textAlign='center'; x.fillText('Untested',pad.l+16.5*cw,pad.t+ch*.6);
+  x.font='12px "IBM Plex Sans", system-ui'; x.fillStyle=C.muted;
+  MW.forEach((w,ci)=>{ if(ci%4===0) x.fillText(Math.round(w*100)+'%',pad.l+(ci+.5)*cw,c.h-pad.b+14); });
+  x.textAlign='right'; MT.forEach((t,ri)=>{ if((ri+1)%4===0) x.fillText(t+' mm',pad.l-6,c.h-pad.b-(ri+.5)*ch); });
+  mapSt={pad,cw,ch,h:c.h};
+  const unit=mapMetric==='SE'?' dB':'', lab={R:'Reflection',A:'Absorption',T:'Transmission',SE:'Shielding'}[mapMetric];
+  $('#lgMap').innerHTML=`<span>Graphite content across, thickness up</span><span style="display:inline-flex;align-items:center;gap:8px">${mapMetric==='SE'?'0 dB':'0%'} <i style="width:120px;height:10px;border-radius:3px;background:linear-gradient(90deg,${C.heat0},${C.heat1});margin:0"></i> ${mapMetric==='SE'?Math.round(vmax)+' dB':'100%'} ${lab.toLowerCase()}, model median</span>`; }
+hover($('#cvMap'),$('#tipMap'),(mx,my)=>{ if(!mapSt||!mapGrid) return null; const {pad,cw,ch,h}=mapSt, ci=Math.floor((mx-pad.l)/cw), ri=Math.floor((h-pad.b-my)/ch); if(ci<0||ci>=MW.length||ri<0||ri>=MT.length) return null; const g=mapGrid[ri][ci]; const head=`<b>${Math.round(MW[ci]*100)}% graphite · ${MT[ri]} mm</b><br>`;
+  if(!g) return head+'Calculating…'; if(g.u) return head+'Untested: no data or model here';
+  const tag=(ci===12&&ri===1)?'Measured recipe (model shown)':'Modelled estimate';
+  return head+`${tag}<br>Reflected ${pct(g.R)} · Absorbed ${pct(g.A)} · Transmitted ${(g.T*100).toFixed(1)}%<br>Shielding ${fmt(g.S)} dB`; });
+$$('#mapMetric button').forEach(b=>b.onclick=()=>{ mapMetric=b.dataset.m; $$('#mapMetric button').forEach(x=>x.setAttribute('aria-pressed',x===b)); drawMap(); });
+
+/* ---------- insight chart ---------- */
+const FI=Array.from({length:41},(_,i)=>8+i*.1);
+const INS=[{n:'Tested recipe on metal · 60%, 0.5 mm',col:C.silver,dash:[4,4],c:rlCurve(refMeas,FI)},{n:'Candidate · 35%, 2.0 mm',col:C.s1,c:rlCurve(candOne,FI)},{n:'Candidate · 25%, 2.5 mm over 55%, 1.25 mm',col:C.s3,c:rlCurve(candTwo,FI)}];
+let insSt=null;
+function drawIns(){ const cv=$('#cvIns'), c=setup(cv), x=c.x, pad={l:46,r:12,t:10,b:24};
+  const X=f=>pad.l+(f-8)/4*(c.w-pad.l-pad.r), Y=v=>pad.t+(-v)/30*(c.h-pad.t-pad.b);
+  x.strokeStyle=C.edge; x.fillStyle=C.muted; x.lineWidth=1; x.textAlign='right';
+  [0,-10,-20,-30].forEach(v=>{ x.beginPath(); x.moveTo(pad.l,Y(v)); x.lineTo(c.w-pad.r,Y(v)); x.stroke(); x.fillText(v===0?'0 dB':fmt(v,0),pad.l-6,Y(v)); });
+  x.textAlign='center'; [8,9,10,11,12].forEach(f=>x.fillText(f+' GHz',X(f),c.h-pad.b+14));
+  x.save(); x.beginPath(); x.rect(pad.l,pad.t,c.w-pad.l-pad.r,c.h-pad.t-pad.b); x.clip();
+  x.setLineDash([5,4]); x.strokeStyle=C.muted; x.beginPath(); x.moveTo(pad.l,Y(-10)); x.lineTo(c.w-pad.r,Y(-10)); x.stroke(); x.setLineDash([]);
+  INS.forEach(s=>{ if(!s.dash){ x.beginPath(); FI.forEach((f,i)=>i?x.lineTo(X(f),Y(Math.max(-30,s.c.lo[i]))):x.moveTo(X(f),Y(Math.max(-30,s.c.lo[i])))); for(let i=FI.length-1;i>=0;i--) x.lineTo(X(FI[i]),Y(s.c.hi[i])); x.closePath(); x.fillStyle=rgba(s.col,.16); x.fill(); }
+    x.beginPath(); FI.forEach((f,i)=>i?x.lineTo(X(f),Y(Math.max(-30,s.c.med[i]))):x.moveTo(X(f),Y(Math.max(-30,s.c.med[i])))); x.strokeStyle=s.col; x.lineWidth=2; x.setLineDash(s.dash||[]); x.stroke(); x.setLineDash([]); });
+  x.restore(); x.fillStyle=C.muted; x.textAlign='left'; x.fillText('−10 dB: 90% absorbed',pad.l+6,Y(-10)+10);
+  insSt={X,pad,w:c.w};
+  $('#lgIns').innerHTML=INS.map(s=>`<span><i style="background:${s.col}"></i>${s.n}</span>`).join('')+`<span><i class="band" style="background:${C.silver}"></i>10–90% of model draws</span>`; }
+hover($('#cvIns'),$('#tipIns'),mx=>{ if(!insSt) return null; const {pad,w}=insSt; if(mx<pad.l||mx>w-pad.r) return null; const f=8+(mx-pad.l)/(w-pad.l-pad.r)*4, i=Math.round((f-8)/.1);
+  return `<b>${FI[i].toFixed(1)} GHz</b> · modelled<br>`+INS.map(s=>`${s.n.split(' · ')[1]||s.n}: ${fmt(s.c.med[i])} dB`).join('<br>'); });
+
+/* ---------- cards ---------- */
+const ICON={drone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
+ plane:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 13l8-2 4-8h2l-2 8 7 2v2l-7-1-1 5 2 2v1l-4-1-4 1v-1l2-2-1-5-6 1z"/></svg>',
+ ground:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h16M7 20v-6h10v6M9 14V9h6v5M12 9V4M8 6a6 6 0 0 1 8 0"/></svg>',
+ sat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M2 5l5 5M7 2l3 3M22 19l-5-5M17 22l-3-3M9 9L4 4M15 15l5 5"/></svg>',
+ mars:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M5 9c3 1 5 0 7-2M8 17c2-2 5-2 8 0"/></svg>'};
+const APPS=[['drone','Drones',['Electromagnetic shielding','Antenna and electronics protection','Controlled electromagnetic signature','Lightweight functional coatings']],
+ ['plane','Aircraft',['EMI protection','Electronics enclosures','Selected structural panels','Electromagnetic signature management']],
+ ['ground','Ground systems',['Electronics protection','Communication equipment','Sensor housings','Radar-related applications']],
+ ['sat','Satellites',['Spacecraft electronics EMI protection','RF-compatible enclosures','Lightweight multifunctional materials']],
+ ['mars','Spacecraft and Mars',['Spacecraft electronics','Communication systems','Sensor protection','Lightweight electromagnetic management']]];
+$('#appCards').innerHTML=APPS.map(([ic,h,l])=>`<div class="card" tabindex="0"><div class="ic">${ICON[ic]}</div><h3>${h}</h3><span class="note">Potential use</span><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+$$('#appCards .card').forEach(cd=>{ const on=()=>{ $$('#appCards .card').forEach(c=>c.classList.remove('sel')); cd.classList.add('sel'); }; cd.addEventListener('mouseenter',on); cd.addEventListener('focus',on); });
+const fB=evalDesign(.35,2,1,10,'ram',D), fC=evalDesign(.25,2.5,1,10,'ram',D);
+const fTwo=(()=>{ const a=D.map(dr=>Math.pow(10,M.rlDb(10,candTwo(dr,10))/10)); return M.quant(a,.5); })();
+$('#funcCards').innerHTML=[
+ ['Design A','High graphite, thin layer','60% graphite, 0.5 mm',`Stronger reflection: about ${pct(measAvg.R)} reflected, ${fmt(measAvg.SE)} dB shielding. Potential EMI shielding.`,'measured','Measured'],
+ ['Design B','Less graphite, thicker','35% graphite, 2.0 mm on metal',`Potentially increased absorption: about ${pct(fB.A)} absorbed at 10 GHz.`,'model','Modelled estimate'],
+ ['Design C','Multilayer architecture','25% over 55% graphite, 3.75 mm on metal',`Electromagnetic impedance engineering: about ${pct(1-fTwo)} absorbed at 10 GHz.`,'model','Modelled estimate']
+].map(([a,b,c,d,tg,tl])=>`<div class="card"><span class="kick">${a}</span><h3>${b}</h3><span class="note">${c}</span><p>${d}</p><span class="tag ${tg}">${tl}</span></div>`).join('');
+$('#massTbl').innerHTML='<thead><tr><th>Layer</th><th>Density</th><th>Areal mass</th></tr></thead><tbody>'+
+ [['Bhavira 60:40 composite, 0.5 mm',M.density(.6),.5],['Bhavira 35:65 composite, 2.0 mm (candidate)',M.density(.35),2],['Aluminium sheet, 0.5 mm (reference)',2.70,.5],['Steel sheet, 0.5 mm (reference)',7.85,.5]].map(([n,r,t])=>`<tr><td>${n}</td><td>${r.toFixed(2)} g/cm³</td><td>${(r*t).toFixed(2)} kg/m²</td></tr>`).join('')+'</tbody>';
+const ROAD=[['Material fabrication','done'],['Composition screening','now'],['Thickness optimisation','later'],['X-band measurements','now'],['C-band / Ku-band measurements','later'],['Free-space measurements','later'],['Environmental testing','later'],['Mechanical testing','later'],['Thermal / vacuum testing','later'],['Relevant-environment validation','later'],['Prototype panel','later'],['Application-specific demonstrator','later']];
+$('#road').innerHTML=ROAD.map(([n,s],i)=>`<div class="st ${s}"><span class="n">Stage ${i+1}${s==='done'?' · done':s==='now'?' · in progress':''}</span><span>${n}</span>${i===1?'<span class="here">We are here: one composition tested</span>':i===3?'<span class="here">Three 60:40 samples measured</span>':''}</div>`).join('');
+
+/* ---------- modes, chapters, 3D sync ---------- */
+let mode='full', order=MODES.full.slice(), activeId='hero';
+function applyMode(m,scroll=true){ mode=m; order=MODES[m].slice(); $$('.modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));
+  STORY.forEach(ch=>{ const el=document.getElementById(ch.id), i=order.indexOf(ch.id); el.hidden=i<0; el.style.order=i<0?999:i+1; });
+  const note=$('#modeNote'); note.hidden=m==='full'; note.style.order=0;
+  note.textContent={investor:'Investor view: the business story, measured proof and roadmap. Switch to Full story for every section.',scientist:'Scientist view: measurements, model, uncertainty and equations first.',defence:'Defence view: radar absorption, EMI protection, applications and validation status.'}[m]||'';
+  if(scroll) document.getElementById('hero').scrollIntoView({behavior:reduce?'auto':'smooth'}); drawAll(); }
+$$('.modes button').forEach(b=>b.onclick=()=>{ Player.stop(); applyMode(b.dataset.mode); });
+function jump(id){ if(order.indexOf(id)<0) applyMode('full'); const el=document.getElementById(id); setTimeout(()=>el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}),60); if(Player.playing) Player.goTo(order.indexOf(id)); }
+$$('[data-jump]').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.jump)));
+function sync3D(){ if(!World) return; const ch=STORY.find(c=>c.id===activeId); if(!ch) return;
+  let echo=1, absorbed=0, trans=0;
+  if(activeId==='emi'){ echo=emiOn?meas10.R:0; absorbed=emiOn?meas10.A:0; trans=emiOn?meas10.T:1; }
+  else if(activeId==='ram'||activeId==='compare'){ echo=ramEng?engR.R:1; absorbed=ramEng?1-engR.R:0; }
+  else if(activeId==='apps'){ echo=engR.R; absorbed=1-engR.R; }
+  World.setResult({echo,absorbed,trans,coat:['mars','final','apps','question'].includes(activeId)?1:0});
+  World.go(ch.station,ch.cam); World.updateSlab(); }
+const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ const id=e.target.dataset.ch; if(id!==activeId){ activeId=id; sync3D(); } } }); },{rootMargin:'-45% 0px -50% 0px'});
+$$('.chap').forEach(s=>io.observe(s));
+
+/* ---------- audio player ---------- */
+const Player=(function(){
+  const synth=('speechSynthesis' in window)?window.speechSynthesis:null; let voices=[], vA=null, vB=null;
+  function pickVoices(){ if(!synth) return; voices=synth.getVoices().filter(v=>/^en/i.test(v.lang)); if(!voices.length) voices=synth.getVoices();
+    const fem=/female|zira|aria|jenny|samantha|susan|hazel|libby|sonia|serena|karen|moira|tessa|natasha|victoria|google uk english female|google us english/i, mal=/male|david|guy|mark|daniel|george|ryan|alex|fred|thomas|oliver|james|google uk english male/i;
+    vA=voices.find(v=>mal.test(v.name)&&!/female/i.test(v.name))||voices[0]||null;
+    vB=voices.find(v=>fem.test(v.name)&&v!==vA)||voices.find(v=>v!==vA)||vA; }
+  if(synth){ pickVoices(); synth.onvoiceschanged=pickVoices; }
+  let ci=0, li=0, token=0, subs=true; const api={playing:false};
+  const sub=$('#subtitle'), pA=$('#pA'), pB=$('#pB'), bPlay=$('#bPlay');
+  function show(who,text){ pA.classList.toggle('talk',who==='A'); pB.classList.toggle('talk',who==='B'); sub.innerHTML=subs?`<span><b>${who==='A'?'Alex':'Priya'}</b>${text}</span>`:'<span class="note">Subtitles off</span>'; }
+  function idle(msg){ pA.classList.remove('talk'); pB.classList.remove('talk'); if(msg!=null) sub.innerHTML=subs?msg:'<span class="note">Subtitles off</span>'; }
+  function chapter(){ return STORY.find(c=>c.id===order[ci]); }
+  function scrollTo(){ const el=document.getElementById(order[ci]); if(el) el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); }
+  function speakLine(){ const my=++token; const ch=chapter(); if(!ch){ api.stop(); idle('The end. Press replay to hear it again.'); return; }
+    if(li>=ch.lines.length){ ci++; li=0; if(ci>=order.length){ api.stop(); idle('That is the full pitch. Press replay to hear it again, or explore any section.'); return; } scrollTo(); setTimeout(()=>{ if(my===token&&api.playing) speakLine(); },900); return; }
+    const [who,text]=ch.lines[li]; show(who,text);
+    const sentences=text.match(/[^.!?]+[.!?]+/g)||[text]; let si=0;
+    const next=()=>{ if(my!==token||!api.playing) return; li++; setTimeout(()=>{ if(my===token&&api.playing) speakLine(); },350); };
+    if(synth && voices.length){
+      const sayNext=()=>{ if(my!==token||!api.playing) return; if(si>=sentences.length) return next();
+        const u=new SpeechSynthesisUtterance(sentences[si++].trim()); const v=who==='A'?vA:vB; if(v) u.voice=v; u.lang=(v&&v.lang)||'en-GB';
+        u.rate=who==='A'?0.98:1.02; u.pitch=who==='A'?(vA===vB?0.8:0.95):(vA===vB?1.25:1.05);
+        u.onend=()=>sayNext(); u.onerror=()=>{ if(my===token) sayNext(); }; synth.speak(u); };
+      sayNext();
+    } else { const ms=Math.max(2200,text.split(/\s+/).length*400); setTimeout(next,ms); }
+  }
+  api.play=()=>{ if(api.playing) return; api.playing=true; bPlay.textContent='Pause'; bPlay.setAttribute('aria-label','Pause');
+    const idx=order.indexOf(activeId); if(li===0&&idx>=0&&idx!==ci) ci=idx; scrollTo(); if(synth) synth.cancel(); setTimeout(speakLine,reduce?50:700); };
+  api.stop=()=>{ api.playing=false; token++; if(synth) synth.cancel(); bPlay.textContent='Play pitch'; bPlay.setAttribute('aria-label','Play pitch'); idle(); };
+  api.pause=()=>{ api.stop(); idle(subs?'Paused. Press play to continue from here.':null); };
+  api.goTo=i=>{ token++; if(synth) synth.cancel(); ci=Math.max(0,Math.min(order.length-1,i)); li=0; scrollTo(); if(api.playing) setTimeout(speakLine,700); };
+  api.replay=()=>{ api.stop(); ci=0; li=0; api.play(); };
+  $('#bPlay').onclick=()=>api.playing?api.pause():api.play();
+  $('#heroPlay').onclick=()=>{ ci=0; li=0; api.play(); };
+  $('#replayBtn').onclick=()=>api.replay();
+  $('#bReplay').onclick=()=>api.replay();
+  $('#bNext').onclick=()=>{ const cur=api.playing?ci:Math.max(0,order.indexOf(activeId)); api.goTo(cur+1); };
+  $('#bPrev').onclick=()=>{ const cur=api.playing?ci:Math.max(0,order.indexOf(activeId)); api.goTo(cur-1); };
+  $('#bSubs').onclick=()=>{ subs=!subs; $('#bSubs').setAttribute('aria-pressed',subs); if(!api.playing) idle(subs?'Subtitles on.':null); else { const ch=chapter(); if(ch&&ch.lines[li]) show(ch.lines[li][0],ch.lines[li][1]); } };
+  if(!synth) sub.textContent='Your browser has no text-to-speech. Press play to read the conversation as subtitles.';
+  return api;
+})();
+
+/* ---------- boot ---------- */
+function drawAll(){ drawMeas(); drawMap(); drawIns(); }
+let rz; addEventListener('resize',()=>{ clearTimeout(rz); rz=setTimeout(drawAll,150); });
+applyMode('full',false); tune(); computeMap(); drawAll(); sync3D();
+if(!World){ document.body.style.background='radial-gradient(ellipse at 70% 30%, #10203a, #04060c 70%)'; }
+})();
+
+</script>
+</body>
+</html>
